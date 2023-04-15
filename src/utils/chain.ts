@@ -11,7 +11,7 @@ export const createModel = (settings: ModelSettings) =>
       settings.customApiKey === ""
         ? process.env.OPENAI_API_KEY
         : settings.customApiKey,
-    temperature: 0.9,
+    temperature: settings.temperature === "" || Number(settings.temperature) == undefined ? 0.9 : Number(settings.temperature),
     modelName:
       settings.customModelName === "" ? GPT_35_TURBO : settings.customModelName,
     maxTokens: 1000,
@@ -64,6 +64,50 @@ export const executeCreateTaskAgent = async (
     tasks,
     lastTask,
     result,
+  });
+};
+
+const PrioritizationTaskPrompt = new PromptTemplate({
+  template:
+    "You are a task prioritization AI tasked with cleaning the formatting of and repioritizing"+
+    " the following task list: {tasks}." + 
+    "Consider the ultimate goal:  {goal}."+
+    "Do not remove any aks. Return the result as a numbered list, like:"+
+    "#.First task:"+
+    "#.Second task:"+
+    "Start the task list with the most important task.",
+  inputVariables: ["goal", "tasks"],
+});
+
+export const executePrioritizationAgent = async (
+  model: OpenAI,
+  goal: string,
+  tasks: string[]
+) => {
+  return await new LLMChain({ llm: model, prompt: PrioritizationTaskPrompt }).call({
+    goal,
+    tasks,
+  });
+};
+
+const executeChainPrompt = new PromptTemplate({
+  template: "You are an AI who performs one task based on the following objective: {goal}."+
+  "Take into account these previously completed task list: {context}."+
+  "You are currently tasked with: {current_task}."+
+  "Responds with how you would complete this task:",
+  inputVariables: ["goal", "context", "current_task"],
+});
+
+export const executeChainAgent = async (
+  model: OpenAI,
+  goal: string,
+  context: string[],
+  current_task: string
+) => {
+  return await new LLMChain({ llm: model, prompt: executeChainPrompt }).call({
+    goal,
+    current_task,
+    context,
   });
 };
 
