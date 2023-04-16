@@ -36,8 +36,6 @@ By sponsoring this free, open-source project, you not only have the opportunity 
 <a href="https://github.com/sponsors/reworkd-admin">👉 Click here</a> to support the project 
 </p>
 
-
-
 <h3 align="center">
 🙌🏻 Our Sponsers 🙌🏻
 </h3>
@@ -126,7 +124,7 @@ It will attempt to reach the goal by thinking of tasks to do, executing them, an
 This platform is currently in beta, we are currently working on:
 
 - Long term memory via a vector DB 🧠
-- Web browsing capabilities via langchain 🌐
+- Web browsing capabilities via LangChain 🌐
 - Interaction with websites and people 👨‍👩‍👦
 - Writing capabilities via a document API 📄
 - Saving agent runs 💾
@@ -222,6 +220,7 @@ npm run dev
 ```
 
 ### 🚀 GitHub Codespaces
+
 Set up AgentGPT in the cloud immediately by using [GitHub Codespaces](https://github.com/features/codespaces).
 
 1. From the GitHub repo, click the green "Code" button and select "Codespaces".
@@ -235,6 +234,7 @@ Set up AgentGPT in the cloud immediately by using [GitHub Codespaces](https://gi
 - To restart AgentGPT, run `npm run dev` in Terminal.
 
 Run the project 🥳
+
 ```
 npm run dev
 ```

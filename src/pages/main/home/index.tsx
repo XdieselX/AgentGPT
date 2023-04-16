@@ -1,23 +1,27 @@
 import { type NextPage } from "next";
-import Badge from "../components/Badge";
-import DefaultLayout from "../layout/default";
-import React, { useEffect } from "react";
-import type { Message } from "../components/ChatWindow";
-import ChatWindow from "../components/ChatWindow";
-import Drawer from "../components/Drawer";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import React, { useEffect, useRef } from "react";
+import DefaultLayout from "../../../layout/default";
 import { FaRobot, FaStar } from "react-icons/fa";
-import PopIn from "../components/motions/popin";
+import type { Message } from "../../../components/";
+import { 
+  Badge, 
+  Button, 
+  ChatWindow, 
+  Drawer,
+  Expand,
+  Input,
+  HelpDialog,
+  PopIn,
+  SettingsDialog,
+  TaskWindow
+} from "../../../components";
 import { VscLoading } from "react-icons/vsc";
-import AutonomousAgent from "../components/AutonomousAgent";
-import Expand from "../components/motions/expand";
-import HelpDialog from "../components/HelpDialog";
-import SettingsDialog from "../components/SettingsDialog";
+import AutonomousAgent from "../../../components/AutonomousAgent";
+import { GPT_35_TURBO } from "../../../utils/constants";
 import { useSession } from "next-auth/react";
-import { api } from "../utils/api";
-import { env } from "../env/client.mjs";
-import { TaskWindow } from "../components/TaskWindow";
+import { api } from "../../../utils/api";
+import { env } from "../../../env/client.mjs";
+
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
@@ -25,7 +29,10 @@ const Home: NextPage = () => {
   const [goalInput, setGoalInput] = React.useState<string>("");
   const [agent, setAgent] = React.useState<AutonomousAgent | null>(null);
   const [customApiKey, setCustomApiKey] = React.useState<string>("");
-  const [customModelName, setCustomModelName] = React.useState<string>("");
+  const [customModelName, setCustomModelName] = React.useState<string>(GPT_35_TURBO);
+  const [temperature, setTemperature] = React.useState<string>("0.9");
+  const [maxTokens, setMaxTokens] = React.useState<string>("1000");
+
   const [shouldAgentStop, setShouldAgentStop] = React.useState(false);
   const [tasks, setTasks] = React.useState<string[]>([]);
 
@@ -61,6 +68,11 @@ const Home: NextPage = () => {
     localStorage.setItem(key, JSON.stringify(true));
   }, []);
 
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    nameInputRef?.current?.focus();
+  }, []);
+
   useEffect(() => {
     if (agent == null) {
       setShouldAgentStop(false);
@@ -88,7 +100,7 @@ const Home: NextPage = () => {
       goalInput,
       handleAddMessage,
       () => setAgent(null),
-      { customApiKey, customModelName }
+      { customApiKey, customModelName, temperature, maxTokens }
     );
     setAgent(agent);
     agent.run().then(console.log).catch(console.error);
@@ -110,10 +122,14 @@ const Home: NextPage = () => {
         setCustomApiKey={setCustomApiKey}
         customModelName={customModelName}
         setCustomModelName={setCustomModelName}
+        temperature={temperature}
+        setTemperature={setTemperature}
+        maxTokens={maxTokens}
+        setMaxTokens={setMaxTokens}
         show={showSettingsDialog}
         close={() => setShowSettingsDialog(false)}
       />
-      <main className="flex h-screen w-screen flex-row">
+      <main className="flex min-h-screen flex-row">
         <Drawer
           showHelp={() => setShowHelpDialog(true)}
           showSettings={() => setShowSettingsDialog(true)}
@@ -156,6 +172,7 @@ const Home: NextPage = () => {
             <div className="mt-5 flex w-full flex-col gap-2 sm:mt-10">
               <Expand delay={1.2}>
                 <Input
+                  inputRef={nameInputRef}
                   left={
                     <>
                       <FaRobot />
