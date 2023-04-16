@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { RequestBody } from "../../utils/interfaces";
+import type { RequestBody } from "../../utils";
 import { createAgent } from "../../services/agent-service";
 
 export const config = {

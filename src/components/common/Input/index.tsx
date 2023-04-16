@@ -4,7 +4,7 @@ import {
   Combobox
 } from ".."
 import clsx from "clsx";
-import isArrayOfType from "../../../utils/helpers";
+import { isArrayOfType } from "../../../utils";
 
 interface InputProps {
   left?: React.ReactNode;

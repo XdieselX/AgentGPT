@@ -5,8 +5,8 @@ import {
   extractArray,
   realTasksFilter,
   startGoalAgent,
-} from "../utils/chain";
-import type { ModelSettings } from "../utils/types";
+} from "../utils";
+import type { ModelSettings } from "../utils";
 
 export async function startAgent(modelSettings: ModelSettings, goal: string) {
   const completion = await startGoalAgent(createModel(modelSettings), goal);

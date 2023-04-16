@@ -9,18 +9,19 @@ import {
   FaStar,
   FaCopy,
 } from "react-icons/fa";
-import autoAnimate from "@formkit/auto-animate";
-import {
-  Button,
-  Expand,
-  PopIn
-} from "../..";
 import * as htmlToImage from "html-to-image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import { useRouter } from "next/router";
+import autoAnimate from "@formkit/auto-animate";
+
+import {
+  Button,
+  Expand,
+  PopIn
+} from "../..";
 import { clientEnv } from "../../../env/schema.mjs";
 
 interface ChatWindowProps {

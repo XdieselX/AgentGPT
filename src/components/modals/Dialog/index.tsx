@@ -1,19 +1,15 @@
 import React from "react";
 import { Button } from "../..";
+import { DialogProps } from "./index.props";
 
-export default function Dialog({
-  header,
-  children,
-  isShown,
-  close,
-  footerButton,
-}: {
-  header: React.ReactNode;
-  children: React.ReactNode;
-  isShown: boolean;
-  close: () => void;
-  footerButton?: React.ReactNode;
-}) {
+export function Dialog(props: DialogProps) {
+  const {
+    header,
+    children,
+    isShown,
+    close,
+    footerButton,
+  } = props;
 
   if (!isShown) {
     return <>{null}</>;

@@ -1,7 +1,7 @@
-import { createModel, executeTaskAgent } from "../../utils/chain";
+import { createModel, executeTaskAgent } from "../../utils";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { RequestBody } from "../../utils/interfaces";
+import type { RequestBody } from "../../utils";
 import { executeAgent } from "../../services/agent-service";
 
 export const config = {

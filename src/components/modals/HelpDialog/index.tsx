@@ -1,6 +1,6 @@
 import React from "react";
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
-import Dialog from "../Dialog";
+import { Dialog } from "..";
 
 export function HelpDialog({
   show,

@@ -1,8 +1,12 @@
 import React from "react";
 import { FaKey, FaMicrochip, FaExclamationCircle } from "react-icons/fa";
-import Dialog from "../Dialog";
-import { Button, Input, Dropdown } from "../..";
-import { GPT_4, GPT_MODEL_NAMES } from "../../../utils/constants";
+import { 
+  Button, 
+  Dialog,
+  Dropdown,
+  Input, 
+} from "../..";
+import { GPT_4, GPT_MODEL_NAMES } from "../../../utils";
 import { SettingsDialogProps } from "./index.props";
 
 export function SettingsDialog(props : SettingsDialogProps) {

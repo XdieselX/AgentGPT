@@ -71,7 +71,7 @@ class AutonomousAgent {
     }
 
     this.numLoops += 1;
-    const maxLoops = this.modelSettings.customApiKey === "" ? 4 : 50;
+    const maxLoops = this.modelSettings.customApiKey === "" ? 50 : 50;
     if (this.numLoops > maxLoops) {
       this.sendLoopMessage();
       this.shutdown();
@@ -79,7 +79,7 @@ class AutonomousAgent {
     }
 
     // Wait before starting
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 500));
 
     // Execute first task
     // Get and remove first task
@@ -91,7 +91,7 @@ class AutonomousAgent {
     this.sendExecutionMessage(currentTask as string, result);
 
     // Wait before adding tasks
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 500));
     this.sendThinkingMessage();
 
     // Add new tasks
@@ -102,7 +102,7 @@ class AutonomousAgent {
       );
       this.tasks = this.tasks.concat(newTasks);
       for (const task of newTasks) {
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, 400));
         this.sendTaskMessage(task);
       }
 
@@ -122,7 +122,7 @@ class AutonomousAgent {
 
   async getInitialTasks(): Promise<string[]> {
     if (this.shouldRunClientSide()) {
-      await testConnection(this.modelSettings);
+      //await testConnection(this.modelSettings);
       return await startAgent(this.modelSettings, this.goal);
     }
 
@@ -272,7 +272,7 @@ const testConnection = async (modelSettings: ModelSettings) => {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${modelSettings.customApiKey}`,
+        Authorization: `Bearer ${modelSettings.customApiKey}`,//might be a problem
       },
     }
   );

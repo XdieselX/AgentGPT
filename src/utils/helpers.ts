@@ -17,4 +17,6 @@ const isArrayOfType = <T>(
   );
 };
 
-export default isArrayOfType;
+export {
+    isArrayOfType
+};

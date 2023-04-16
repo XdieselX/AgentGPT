@@ -2,8 +2,7 @@ import { OpenAI } from "langchain/llms/openai";
 import { PromptTemplate } from "langchain/prompts";
 import { LLMChain } from "langchain/chains";
 import type { ModelSettings } from "./types";
-import { GPT_35_TURBO } from "./constants";
-import { tasksParser } from "./parsers";
+import { GPT_35_TURBO, tasksParser } from ".";
 
 export const createModel = (settings: ModelSettings) =>
   new OpenAI({

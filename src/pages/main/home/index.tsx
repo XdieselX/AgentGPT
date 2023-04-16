@@ -1,7 +1,9 @@
 import { type NextPage } from "next";
 import React, { useEffect, useRef } from "react";
-import DefaultLayout from "../../../layout/default";
 import { FaRobot, FaStar } from "react-icons/fa";
+import { VscLoading } from "react-icons/vsc";
+import { useSession } from "next-auth/react";
+import DefaultLayout from "../../../layout/default";
 import type { Message } from "../../../components/";
 import { 
   Badge, 
@@ -15,11 +17,8 @@ import {
   SettingsDialog,
   TaskWindow
 } from "../../../components";
-import { VscLoading } from "react-icons/vsc";
 import AutonomousAgent from "../../../components/AutonomousAgent";
-import { GPT_35_TURBO } from "../../../utils/constants";
-import { useSession } from "next-auth/react";
-import { api } from "../../../utils/api";
+import { api, GPT_35_TURBO } from "../../../utils";
 import { env } from "../../../env/client.mjs";
 
 
