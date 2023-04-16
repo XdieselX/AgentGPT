@@ -1,24 +1,23 @@
 import React from "react";
-import Button from "./Button";
-import { FaKey, FaMicrochip } from "react-icons/fa";
-import Dialog from "./Dialog";
-import Input from "./Input";
+import { FaKey, FaMicrochip, FaExclamationCircle } from "react-icons/fa";
+import Dialog from "../Dialog";
+import { Button, Input, Dropdown } from "../..";
+import { GPT_4, GPT_MODEL_NAMES } from "../../../utils/constants";
+import { SettingsDialogProps } from "./index.props";
 
-export default function SettingsDialog({
-  show,
-  close,
-  customApiKey,
-  setCustomApiKey,
-  customModelName,
-  setCustomModelName,
-}: {
-  show: boolean;
-  close: () => void;
-  customApiKey: string;
-  setCustomApiKey: (key: string) => void;
-  customModelName: string;
-  setCustomModelName: (key: string) => void;
-}) {
+export function SettingsDialog(props : SettingsDialogProps) {
+  const {
+    show,
+    close,
+    customApiKey,
+    setCustomApiKey,
+    customModelName,
+    setCustomModelName,
+    temperature,
+    setTemperature,
+    maxTokens,
+    setMaxTokens,
+  } = props;
   const [key, setKey] = React.useState<string>(customApiKey);
 
   const handleClose = () => {
@@ -43,6 +42,28 @@ export default function SettingsDialog({
         your own OpenAI usage but give you greater access to AgentGPT! You can
         additionally select any model OpenAI offers.
       </p>
+      <p
+        className={
+          customModelName === GPT_4
+            ? "rounded-md border-[2px] border-white/10 bg-yellow-300 text-black"
+            : ""
+        }
+      >
+        <FaExclamationCircle className="inline-block" />
+        &nbsp;
+        <b>
+          To use the GPT-4 model, you need to also provide the API key for
+          GPT-4. You can request for it&nbsp;
+          <a
+            href="https://openai.com/waitlist/gpt-4-api"
+            className="text-blue-500"
+          >
+            here
+          </a>
+          . (ChatGPT Plus subscription will not work)
+        </b>
+      </p>
+      <br />
       <div className="text-md relative flex-auto p-2 leading-relaxed">
         <Input
           left={
@@ -51,11 +72,13 @@ export default function SettingsDialog({
               <span className="ml-2">Model:</span>
             </>
           }
-          placeholder={"gpt-3.5-turbo"}
+          type="combobox"
           value={customModelName}
-          onChange={(e) => setCustomModelName(e.target.value)}
+          onChange={() => null}
+          setValue={setCustomModelName}
+          attributes={{options : GPT_MODEL_NAMES}}
         />
-        <br />
+        <br className="hidden md:inline"/>
         <Input
           left={
             <>

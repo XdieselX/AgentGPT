@@ -10,16 +10,18 @@ import {
   FaCopy,
 } from "react-icons/fa";
 import autoAnimate from "@formkit/auto-animate";
-import PopIn from "./motions/popin";
-import Expand from "./motions/expand";
+import {
+  Button,
+  Expand,
+  PopIn
+} from "../..";
 import * as htmlToImage from "html-to-image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
-import Button from "./Button";
 import { useRouter } from "next/router";
-import { clientEnv } from "../env/schema.mjs";
+import { clientEnv } from "../../../env/schema.mjs";
 
 interface ChatWindowProps {
   children?: ReactNode;
@@ -78,13 +80,10 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
 
         {messages.length === 0 && (
           <>
-            {!!clientEnv.NEXT_PUBLIC_STRIPE_DONATION_URL && (
-              <Expand delay={0.7} type="spring">
-                <DonationMessage
-                  url={clientEnv.NEXT_PUBLIC_STRIPE_DONATION_URL}
-                />
+            { false &&<Expand delay={0.7} type="spring">
+              <DonationMessage />
               </Expand>
-            )}
+            }
             <Expand delay={0.8} type="spring">
               <ChatMessage
                 message={{
@@ -99,7 +98,7 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
                 message={{
                   type: "system",
                   value:
-                    "📢 You can first provide your own OpenAI API key via the settings tab!",
+                    "📢 You can provide your own OpenAI API key in the settings tab for increased limits!",
                 }}
               />
             </Expand>
@@ -252,7 +251,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
   );
 };
 
-const DonationMessage = ({ url }: { url: string }) => {
+const DonationMessage = () => {
   const router = useRouter();
 
   return (
@@ -260,14 +259,14 @@ const DonationMessage = ({ url }: { url: string }) => {
       <div className="max-w-none flex-grow">
         💝️ Help support the advancement of AgentGPT. 💝
         <br />
-        Please consider donating help fund our high infrastructure costs.
+        Please consider sponsoring the project on Github.
       </div>
       <div className="flex items-center justify-center">
         <Button
           className="sm:text m-0 rounded-full text-sm "
-          onClick={() => void router.push(url)}
+          //onClick={() => void router.push(url)}
         >
-          Donate Now 🚀
+          Support Now 🚀
         </Button>
       </div>
     </div>
@@ -297,14 +296,15 @@ const getMessagePrefix = (message: Message) => {
       return "Thinking...";
     case "action":
       return message.info ? message.info : "Executing:";
+    case "approval":
+      return "Waiting for Approval...";
   }
 };
 
 export interface Message {
-  type: "goal" | "thinking" | "task" | "action" | "system";
+  type: "goal" | "thinking" | "task" | "action" | "system" | "approval";
   info?: string;
   value: string;
 }
 
-export default ChatWindow;
-export { ChatMessage };
+export { ChatWindow, ChatMessage };

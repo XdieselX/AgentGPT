@@ -1,8 +1,8 @@
 import React from "react";
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
-import Dialog from "./Dialog";
+import Dialog from "../Dialog";
 
-export default function HelpDialog({
+export function HelpDialog({
   show,
   close,
 }: {

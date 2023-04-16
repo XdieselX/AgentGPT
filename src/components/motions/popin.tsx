@@ -18,4 +18,4 @@ const PopIn = (props: MotionProps) => (
 );
 
 PopIn.displayName = "PopIn";
-export default PopIn;
+export { PopIn };

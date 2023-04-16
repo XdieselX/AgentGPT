@@ -18,4 +18,4 @@ const FadeOut = (props: MotionProps) => (
 );
 
 FadeOut.displayName = "FadeOut";
-export default FadeOut;
+export { FadeOut };

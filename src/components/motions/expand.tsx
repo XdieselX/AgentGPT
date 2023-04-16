@@ -23,4 +23,4 @@ const Expand = (props: MotionProps) => (
 );
 
 Expand.displayName = "Expand";
-export default Expand;
+export { Expand };

@@ -1,6 +1,8 @@
 import type { ForwardedRef } from "react";
 import React, { forwardRef, useState } from "react";
-import Loader from "./loader";
+import {
+  Loader 
+} from "..";
 import clsx from "clsx";
 
 export interface ButtonProps {
@@ -59,4 +61,7 @@ const Button = forwardRef(
 );
 
 Button.displayName = "Button";
-export default Button;
+
+export {
+  Button
+}

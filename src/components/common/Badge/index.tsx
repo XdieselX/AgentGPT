@@ -5,7 +5,7 @@ interface BadgeProps {
   children: React.ReactNode;
 }
 
-const Badge = ({ children }: BadgeProps) => {
+export const Badge = ({ children }: BadgeProps) => {
   return (
     <div
       className={clsx(
@@ -18,5 +18,3 @@ const Badge = ({ children }: BadgeProps) => {
     </div>
   );
 };
-
-export default Badge;
