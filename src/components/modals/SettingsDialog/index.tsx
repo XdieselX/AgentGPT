@@ -1,27 +1,49 @@
 import React from "react";
-import { FaKey, FaMicrochip, FaExclamationCircle } from "react-icons/fa";
 import { 
+  FaKey, 
+  FaMicrochip, 
+  FaExclamationCircle,
+  FaThermometerFull,
+  FaSyncAlt
+} from "react-icons/fa";
+import { 
+  Accordion,
   Button, 
   Dialog,
   Dropdown,
-  Input, 
+  Input,
 } from "../..";
-import { GPT_4, GPT_MODEL_NAMES } from "../../../utils";
+import { 
+  GPT_4, 
+  GPT_35_TURBO,
+  GPT_MODEL_NAMES,
+  DEFAULT_MAX_LOOPS_CUSTOM_API_KEY,
+  DEFAULT_MAX_LOOPS_FREE,
+  DEFAULT_MAX_LOOPS_PAID
+} from "../../../utils";
 import { SettingsDialogProps } from "./index.props";
 
 export function SettingsDialog(props : SettingsDialogProps) {
+  
   const {
     show,
     close,
+    reactModelStates
+  } = props;
+  
+  const {
     customApiKey,
     setCustomApiKey,
     customModelName,
     setCustomModelName,
-    temperature,
-    setTemperature,
+    customTemperature,
+    setCustomTemperature,
+    customMaxLoops,
+    setCustomMaxLoops,
     maxTokens,
     setMaxTokens,
-  } = props;
+  } = reactModelStates;
+
   const [key, setKey] = React.useState<string>(customApiKey);
 
   const handleClose = () => {
@@ -33,6 +55,66 @@ export function SettingsDialog(props : SettingsDialogProps) {
     setCustomApiKey(key);
     close();
   };
+
+  React.useEffect(() => {
+    setCustomMaxLoops(
+      !key ? DEFAULT_MAX_LOOPS_FREE : DEFAULT_MAX_LOOPS_CUSTOM_API_KEY
+    );
+
+    return () => {
+      setCustomMaxLoops(DEFAULT_MAX_LOOPS_FREE);
+    };
+  }, [key, setCustomMaxLoops]);
+
+  const advancedSettings = (
+    <>
+      <Input
+        left={
+          <>
+            <FaThermometerFull />
+            <span className="ml-2">Temp: </span>
+          </>
+        }
+        value={customTemperature}
+        onChange={(e) => setCustomTemperature(parseFloat(e.target.value))}
+        type="range"
+        toolTipProperties={{
+          message: "Higher temperature will make output more random",
+          disabled: false,
+        }}
+        attributes={{
+          min: 0,
+          max: 1,
+          step: 0.01,
+        }}
+      />
+      <br />
+      <Input
+        left={
+          <>
+            <FaSyncAlt />
+            <span className="ml-2">Loop #: </span>
+          </>
+        }
+        value={customMaxLoops}
+        disabled={!key}
+        onChange={(e) => setCustomMaxLoops(parseFloat(e.target.value))}
+        type="range"
+        toolTipProperties={{
+          message:
+            "Controls the maximum number of loops that the agent will run (higher value will make more API calls).",
+          disabled: false,
+        }}
+        attributes={{
+          min: 1,
+          max: 100,
+          step: 1,
+        }}
+      />
+    </>
+  );
+
+
 
   return (
     <Dialog
@@ -94,6 +176,12 @@ export function SettingsDialog(props : SettingsDialogProps) {
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
+        <br className="md:inline" />
+          <Accordion
+            child={advancedSettings}
+            name="Advanced Settings"
+          ></Accordion>
+        <br />
         <strong className="mt-10">
           NOTE: To get a key, sign up for an OpenAI account and visit the
           following{" "}

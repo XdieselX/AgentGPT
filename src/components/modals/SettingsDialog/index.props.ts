@@ -1,12 +1,18 @@
-export interface SettingsDialogProps {
-    show: boolean;
-    close: () => void;
+export type reactModelStates = {
     customApiKey: string;
     setCustomApiKey: (key: string) => void;
     customModelName: string;
     setCustomModelName: (key: string) => void;
-    temperature: string;
-    setTemperature: (value: string) => void;
+    customTemperature: number;
+    setCustomTemperature: (temperature: number) => void;
+    customMaxLoops: number;
+    setCustomMaxLoops: (numberOfLoops: number) => void;
     maxTokens: string;
-    setMaxTokens: (value: string) => void;
+    setMaxTokens: (maxTokens: string) => void;
+}
+
+export interface SettingsDialogProps {
+    show: boolean;
+    close: () => void;
+    reactModelStates: reactModelStates;
 }
