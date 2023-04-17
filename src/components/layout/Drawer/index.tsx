@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import {
+  FaAccessibleIcon,
   FaBars,
   FaCog,
   FaDiscord,
   FaGithub,
   FaQuestionCircle,
   FaRobot,
+  FaRocket,
   FaSignInAlt,
   FaSignOutAlt,
   FaTwitter,
@@ -16,6 +18,9 @@ import clsx from "clsx";
 import { useAuth } from "../../../hooks/useAuth";
 import type { Session } from "next-auth";
 import { env } from "../../../env/client.mjs";
+import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
+import { api } from "../../../utils";
 
 export const Drawer = ({
   showHelp,
@@ -26,16 +31,27 @@ export const Drawer = ({
 }) => {
   const [showDrawer, setShowDrawer] = useState(false);
   const { session, signIn, signOut, status } = useAuth();
+  const router = useRouter();
 
-  // TODO: enable for crud
-  // const [animationParent] = useAutoAnimate();s
-  // const query = api.agent.getAll.useQuery(undefined, {
-  //   enabled:
-  //     status == "authenticated" && env.NEXT_PUBLIC_VERCEL_ENV != "production",
-  // });
-  // const router = useRouter();
-  //
-  const userAgents = [];
+  const sub = api.account.subscribe.useMutation({
+    onSuccess: async (url) => {
+      if(!url) return;
+      await router.push(url);
+    },
+  });
+
+  const query = api.agent.getAll.useQuery( undefined, {
+    enabled: session?.user.role === "ADMIN" || true, //FIXME - remove true
+  });
+
+  const manage = api.account.manage.useMutation({
+    onSuccess: async (url) => {
+      if(!url) return;
+      await router.push(url);
+    },
+  });
+
+  const userAgents = query.data ?? [];
 
   const toggleDrawer = () => {
     setShowDrawer((prevState) => !prevState);
@@ -55,7 +71,7 @@ export const Drawer = ({
         className={clsx(
           showDrawer ? "translate-x-0" : "-translate-x-full",
           "z-30 m-0 h-screen w-72 flex-col justify-between bg-zinc-900 p-3 font-mono text-white shadow-3xl transition-all",
-          "fixed md:sticky top-0",
+          "fixed top-0 md:sticky",
           "flex md:translate-x-0"
         )}
       >
@@ -77,15 +93,15 @@ export const Drawer = ({
           </div>
           {/*{TODO: enable for crud}*/}
           <ul>
-            {/*  {userAgents.map((agent, index) => (*/}
-            {/*    <DrawerItem*/}
-            {/*      key={index}*/}
-            {/*      icon={<FaRobot />}*/}
-            {/*      text={agent.name}*/}
-            {/*      className={""}*/}
-            {/*      onClick={() => void router.push(`/agent/${agent.id}`)}*/}
-            {/*    />*/}
-            {/*  ))}*/}
+            {userAgents.map((agent, index) => (
+              <DrawerItem
+                key={index}
+                icon={<FaRobot />}
+                text={agent.name}
+                className={""}
+                onClick={() => void router.push(`/agent/${agent.id}`)}
+              />
+            ))}
 
             {userAgents.length === 0 && (
               <div>
@@ -104,6 +120,15 @@ export const Drawer = ({
           {/*  onClick={() => setAgents([])}*/}
           {/*/>*/}
 
+          {env.NEXT_PUBLIC_FF_SUB_ENABLED ||
+            (router.query.pro && (
+              <ProItem
+                sub={sub.mutate}
+                manage={manage.mutate}
+                session={session}
+              />
+            ))
+          }
           {env.NEXT_PUBLIC_FF_AUTH_ENABLED && (
             <AuthItem session={session} signIn={signIn} signOut={signOut} />
           )}
@@ -114,24 +139,30 @@ export const Drawer = ({
             onClick={showHelp}
           />
           <DrawerItem icon={<FaCog />} text="Settings" onClick={showSettings} />
-          <DrawerItem
-            icon={<FaDiscord />}
-            text="Discord"
-            href="https://discord.gg/jdSBAnmdnY"
-            target="_blank"
-          />
-          <DrawerItem
-            icon={<FaTwitter />}
-            text="Twitter"
-            href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
-            target="_blank"
-          />
-          <DrawerItem
-            icon={<FaGithub />}
-            text="GitHub"
-            href="https://github.com/reworkd/AgentGPT"
-            target="_blank"
-          />
+          <hr className="my-2 border-white/20" />
+          <div>
+            <DrawerItem
+              icon={<FaDiscord size={30}/>}
+              text="Discord"
+              href="https://discord.gg/jdSBAnmdnY"
+              target="_blank"
+              small
+            />
+            <DrawerItem
+              icon={<FaTwitter size={30} />}
+              text="Twitter"
+              href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
+              target="_blank"
+              small
+            />
+            <DrawerItem
+              icon={<FaGithub size={30}/>}
+              text="GitHub"
+              href="https://github.com/reworkd/AgentGPT"
+              target="_blank"
+              small
+            />
+          </div>
         </div>
       </div>
     </>
@@ -146,8 +177,9 @@ interface DrawerItemProps
   icon: React.ReactNode;
   text: string;
   border?: boolean;
-  onClick?: () => void;
+  onClick?: () => any;
   className?: string;
+  small?: boolean;
 }
 
 const DrawerItem = (props: DrawerItemProps) => {
@@ -165,6 +197,7 @@ const DrawerItem = (props: DrawerItemProps) => {
         target={target ?? "_blank"}
       >
         {icon}
+        {!props.small && <span className="text-md ml-4">{text}</span>}
         <span className="text-md ml-4">{text}</span>
       </a>
     );
@@ -196,4 +229,40 @@ const AuthItem: React.FC<{
   const onClick = session?.user ? signOut : signIn;
 
   return <DrawerItem icon={icon} text={text} onClick={onClick} />;
+};
+
+const ProItem: React.FC<{
+  session: Session | null;
+  sub: () => any;
+  manage: () => any;
+}> = ({ sub, manage, session }) => {
+  const text = session?.user?.subscriptionId ? "Account" : "Go Pro";
+  let icon = session?.user ? <FaUser /> : <FaRocket />;
+  if (session?.user?.image) {
+    icon = (
+      <img
+        src={session?.user.image}
+        className="h-6 w-6 rounded-full"
+        alt="User Image"
+      />
+    );
+  }
+
+  return (
+    <DrawerItem
+      icon={icon}
+      text={text}
+      onClick={async () => {
+        if (!session?.user) {
+          void (await signIn());
+        }
+
+        if (session?.user.subscriptionId) {
+          void manage();
+        } else {
+          void sub();
+        }
+      }}
+    />
+  );
 };

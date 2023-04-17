@@ -10,7 +10,7 @@ export const createModel = (settings: ModelSettings) =>
       settings.customApiKey === ""
         ? process.env.OPENAI_API_KEY
         : settings.customApiKey,
-    temperature: settings.temperature === "" || Number(settings.temperature) == undefined ? 0.9 : Number(settings.temperature),
+    temperature: settings.customTemperature || 0.9,
     modelName:
       settings.customModelName === "" ? GPT_35_TURBO : settings.customModelName,
     maxTokens: settings.maxTokens === "" ? 1000 : Number(settings.maxTokens),

@@ -8,6 +8,7 @@ import {
   FaSave,
   FaStar,
   FaCopy,
+  FaImage
 } from "react-icons/fa";
 import * as htmlToImage from "html-to-image";
 import ReactMarkdown from "react-markdown";
@@ -16,23 +17,33 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import { useRouter } from "next/router";
 import autoAnimate from "@formkit/auto-animate";
-
 import {
+  WindowButton,
+  PDFButton,
+  FadeIn,
   Button,
   Expand,
   PopIn
 } from "../..";
 import { clientEnv } from "../../../env/schema.mjs";
 
-interface ChatWindowProps {
+interface ChatWindowProps extends HeaderProps {
   children?: ReactNode;
   className?: string;
   messages: Message[];
+  showDonation: boolean;
 }
 
 const messageListId = "chat-window-message-list";
 
-const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
+const ChatWindow = (props: ChatWindowProps) => {
+  const { 
+    messages, 
+    children, 
+    className,
+    title,
+    showDonation
+  } = props;
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,10 +67,6 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
     }
   });
 
-  useEffect(() => {
-    scrollRef.current && autoAnimate(scrollRef.current);
-  }, [messages]);
-
   return (
     <div
       className={
@@ -67,9 +74,9 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
         (className ?? "")
       }
     >
-      <MacWindowHeader />
+      <MacWindowHeader title={title} messages={messages}/>
       <div
-        className="mb-2 mr-2 h-[14em] overflow-y-auto overflow-x-hidden sm-h:h-[17em] md-h:h-[22em] lg-h:h-[30em] "
+        className="window-heights mb-2 mr-2"
         ref={scrollRef}
         onScroll={handleScroll}
         id={messageListId}
@@ -102,6 +109,11 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
                     "📢 You can provide your own OpenAI API key in the settings tab for increased limits!",
                 }}
               />
+              {showDonation && (
+                <Expand delay={0.7} type="spring">
+                  <DonationMessage />
+                </Expand>
+              )}
             </Expand>
           </>
         )}
@@ -110,7 +122,12 @@ const ChatWindow = ({ messages, children, className }: ChatWindowProps) => {
   );
 };
 
-const MacWindowHeader = () => {
+interface HeaderProps {
+  title?: string | ReactNode;
+  messages: Message[];
+}
+
+const MacWindowHeader = (props : HeaderProps) => {
   const saveElementAsImage = (elementId: string) => {
     const element = document.getElementById(elementId);
     if (!element) {
@@ -146,7 +163,7 @@ const MacWindowHeader = () => {
   };
 
   return (
-    <div className="flex items-center gap-1 rounded-t-3xl p-3">
+    <div className="flex items-center gap-1 overflow-hidden rounded-t-3xl p-3">
       <PopIn delay={0.4}>
         <div className="h-3 w-3 rounded-full bg-red-500" />
       </PopIn>
@@ -156,36 +173,35 @@ const MacWindowHeader = () => {
       <PopIn delay={0.6}>
         <div className="h-3 w-3 rounded-full bg-green-500" />
       </PopIn>
-      <div className="flex flex-grow"></div>
-      <PopIn delay={0.7}>
-        <div
-          className="mr-1 flex cursor-pointer items-center gap-2 rounded-full border-2 border-white/30 p-1 px-2 text-xs hover:bg-white/10"
-          onClick={(): void => saveElementAsImage(messageListId)}
-        >
-          <FaSave size={12} />
-          <p className="font-mono">Save</p>
-        </div>
-      </PopIn>
-
-      <PopIn delay={0.8}>
-        <div
-          className="mr-1 flex cursor-pointer items-center gap-2 rounded-full border-2 border-white/30 p-1 px-2 text-xs hover:bg-white/10"
-          onClick={(): void => copyElementText(messageListId)}
-        >
-          <FaClipboard size={12} />
-          <p className="font-mono">Copy</p>
-        </div>
-      </PopIn>
+      <div className="flex flex-grow font-mono text-sm font-bold text-gray-600 sm:ml-2">
+        {props.title}
+      </div>
+      <WindowButton 
+        delay={0.7}
+        onClick={(): void => saveElementAsImage(messageListId)}
+        icon={<FaImage size={12} />}
+        text={"Save As Image"}
+      />
+      <WindowButton
+        delay={0.8}
+        onClick={(): void => copyElementText(messageListId)}
+        icon={<FaClipboard size={12} />}
+        text={"Copy Text"}
+      />
+      <PDFButton messages={props.messages}/>
     </div>
   );
 };
+
 const ChatMessage = ({ message }: { message: Message }) => {
   const [showCopy, setShowCopy] = useState(false);
   const [copied, setCopied] = useState(false);
+  
   const handleCopyClick = () => {
     void navigator.clipboard.writeText(message.value);
     setCopied(true);
   };
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (copied) {
@@ -197,6 +213,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
       clearTimeout(timeoutId);
     };
   }, [copied]);
+
   return (
     <div
       className="mx-2 my-1 rounded-lg border-[2px] border-white/10 bg-white/20 p-1 font-mono text-sm hover:border-[#1E88E5]/40 sm:mx-4 sm:p-3 sm:text-base"
@@ -256,7 +273,7 @@ const DonationMessage = () => {
   const router = useRouter();
 
   return (
-    <div className="mx-2 my-1 flex flex-col gap-2 rounded-lg border-[2px] border-white/10 bg-blue-500/20 p-1 font-mono hover:border-[#1E88E5]/40 sm:mx-4 sm:flex-row sm:p-3 sm:text-center sm:text-base">
+    <div className="mx-2 my-1 flex flex-col gap-2 rounded-lg border-[2px] border-white/10 bg-blue-500/20 p-1 text-center font-mono hover:border-[#1E88E5]/40 sm:mx-4 sm:p-3 sm:text-base md:flex-row">
       <div className="max-w-none flex-grow">
         💝️ Help support the advancement of AgentGPT. 💝
         <br />
