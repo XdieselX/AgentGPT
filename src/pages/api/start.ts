@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { RequestBody } from "../../utils";
+import type { RequestBody } from "../../utils/interfaces";
 import AgentService from "../../services/agent-service";
 
 export const config = {
@@ -9,15 +9,9 @@ export const config = {
 
 const handler = async (request: NextRequest) => {
   try {
-    const { modelSettings, goal, task } = (await request.json()) as RequestBody;
-    if (task === undefined) {
-      return;
-    }
-
-    const response = await AgentService.executeTaskAgent(modelSettings, goal, task);
-    return NextResponse.json({
-      response: response,
-    });
+    const { modelSettings, goal } = (await request.json()) as RequestBody;
+    const newTasks = await AgentService.startGoalAgent(modelSettings, goal);
+    return NextResponse.json({ newTasks });
   } catch (e) {}
 
   return NextResponse.error();

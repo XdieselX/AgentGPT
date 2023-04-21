@@ -1,18 +1,17 @@
-import type { Message } from "./layout/ChatWindow";
+import type { Message, ModelSettings } from ".";
 import type { AxiosError } from "axios";
 import axios from "axios";
-import type { ModelSettings } from "../utils/types";
-import {
-  createAgent,
-  executeAgent,
-  startAgent,
-} from "../services/agent-service";
+import AgentService from "../services/agent-service";
 import {
   DEFAULT_MAX_LOOPS_CUSTOM_API_KEY,
   DEFAULT_MAX_LOOPS_FREE,
   DEFAULT_MAX_LOOPS_PAID,
 } from "../utils"
+import { env } from "../env/client.mjs";
 import type { Session } from "next-auth";
+
+const TIMEOUT_LONG = 1000;
+const TIMEOUT_SHORT = 800;
 
 class AutonomousAgent {
   name: string;
@@ -50,7 +49,7 @@ class AutonomousAgent {
     try {
       this.tasks = await this.getInitialTasks();
       for (const task of this.tasks) {
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, TIMEOUT_LONG));
         this.sendTaskMessage(task);
       }
     } catch (e) {
@@ -88,7 +87,7 @@ class AutonomousAgent {
     }
 
     // Wait before starting
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, TIMEOUT_SHORT));
 
     // Execute first task
     // Get and remove first task
@@ -100,7 +99,7 @@ class AutonomousAgent {
     this.sendExecutionMessage(currentTask as string, result);
 
     // Wait before adding tasks
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, TIMEOUT_SHORT));
     this.sendThinkingMessage();
 
     // Add new tasks
@@ -111,7 +110,7 @@ class AutonomousAgent {
       );
       this.tasks = this.tasks.concat(newTasks);
       for (const task of newTasks) {
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise((r) => setTimeout(r, TIMEOUT_SHORT));
         this.sendTaskMessage(task);
       }
 
@@ -138,11 +137,14 @@ class AutonomousAgent {
 
   async getInitialTasks(): Promise<string[]> {
     if (this.shouldRunClientSide()) {
+      if(!env.NEXT_PUBLIC_FF_MOCK_MODE_ENABLED){
+        await testConnection(this.modelSettings);
+      }
       //await testConnection(this.modelSettings);
-      return await startAgent(this.modelSettings, this.goal);
+      return await AgentService.startGoalAgent(this.modelSettings, this.goal);
     }
 
-    const res = await axios.post(`/api/chain`, {
+    const res = await axios.post(`/api/start`, {
       modelSettings: this.modelSettings,
       goal: this.goal,
     });
@@ -156,7 +158,7 @@ class AutonomousAgent {
     result: string
   ): Promise<string[]> {
     if (this.shouldRunClientSide()) {
-      return await createAgent(
+      return await AgentService.createTasksAgent(
         this.modelSettings,
         this.goal,
         this.tasks,
@@ -180,7 +182,7 @@ class AutonomousAgent {
 
   async executeTask(task: string): Promise<string> {
     if (this.shouldRunClientSide()) {
-      return await executeAgent(this.modelSettings, this.goal, task);
+      return await AgentService.executeTaskAgent(this.modelSettings, this.goal, task);
     }
 
     const res = await axios.post(`/api/execute`, {
@@ -218,7 +220,7 @@ class AutonomousAgent {
       type: "system",
       value:
         this.modelSettings.customApiKey !== ""
-          ? `This agent has been running for too long (50 Loops). To save your wallet this agent is shutting down. In the future, the number of iterations will be configurable.`
+          ? `This agent has maxed out on loops. To save your wallet, this agent is shutting down. You can configure the number of loops in the advanced settings.`
           : "We're sorry, because this is a demo, we cannot have our agents running for too long. Note, if you desire longer runs, please provide your own API key in Settings. Shutting down.",
     });
   }

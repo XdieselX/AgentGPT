@@ -15,6 +15,17 @@ const config = {
     defaultLocale: "en",
   },
   webpack: function (config, options) {
+    if (!options.isServer) {
+      config.resolve.fallback = {
+        fs: false,
+        path: false,
+        net: false,
+        dns: false,
+        child_process: false,
+        tls: false,
+        ...config.resolve.fallback,
+      };
+    }
     config.experiments = { asyncWebAssembly: true, layers: true };
     return config;
   }
