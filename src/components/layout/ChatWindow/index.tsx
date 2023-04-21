@@ -26,13 +26,7 @@ import {
   PopIn
 } from "../..";
 import { clientEnv } from "../../../env/schema.mjs";
-
-interface ChatWindowProps extends HeaderProps {
-  children?: ReactNode;
-  className?: string;
-  messages: Message[];
-  showDonation: boolean;
-}
+import { ChatMessageProps, ChatWindowProps, HeaderProps } from "./index.props";
 
 const messageListId = "chat-window-message-list";
 
@@ -122,11 +116,6 @@ const ChatWindow = (props: ChatWindowProps) => {
   );
 };
 
-interface HeaderProps {
-  title?: string | ReactNode;
-  messages: Message[];
-}
-
 const MacWindowHeader = (props : HeaderProps) => {
   const saveElementAsImage = (elementId: string) => {
     const element = document.getElementById(elementId);
@@ -193,7 +182,8 @@ const MacWindowHeader = (props : HeaderProps) => {
   );
 };
 
-const ChatMessage = ({ message }: { message: Message }) => {
+const ChatMessage = (props: ChatMessageProps) => {
+  const { message } = props;
   const [showCopy, setShowCopy] = useState(false);
   const [copied, setCopied] = useState(false);
   

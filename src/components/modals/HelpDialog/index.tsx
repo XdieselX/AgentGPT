@@ -1,14 +1,10 @@
 import React from "react";
 import { FaDiscord, FaGithub, FaTwitter } from "react-icons/fa";
 import { Dialog } from "..";
+import { HelpDialogProps } from "./index.props";
 
-export function HelpDialog({
-  show,
-  close,
-}: {
-  show: boolean;
-  close: () => void;
-}) {
+export function HelpDialog(props: HelpDialogProps) {
+  const { show, close } = props;
   return (
     <Dialog header="Welcome to AgentGPT 🤖" isShown={show} close={close}>
       <div className="text-md relative flex-auto p-2 leading-relaxed">

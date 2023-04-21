@@ -15,3 +15,7 @@ export interface ChatWindowProps extends HeaderProps {
   fullscreen?: boolean;
   scrollToBottom?: boolean;
 }
+
+export interface ChatMessageProps {
+  message: Message;
+}

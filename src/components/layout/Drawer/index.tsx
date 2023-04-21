@@ -21,14 +21,10 @@ import { env } from "../../../env/client.mjs";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { api } from "../../../utils";
+import { AuthItemProps, DrawerItemProps, DrawerProps, ProItemProps } from "./index.props";
 
-export const Drawer = ({
-  showHelp,
-  showSettings,
-}: {
-  showHelp: () => void;
-  showSettings: () => void;
-}) => {
+export const Drawer = (props: DrawerProps) => {
+  const { showHelp, showSettings } = props;
   const [showDrawer, setShowDrawer] = useState(false);
   const { session, signIn, signOut, status } = useAuth();
   const router = useRouter();
@@ -169,19 +165,6 @@ export const Drawer = ({
   );
 };
 
-interface DrawerItemProps
-  extends Pick<
-    React.AnchorHTMLAttributes<HTMLAnchorElement>,
-    "href" | "target"
-  > {
-  icon: React.ReactNode;
-  text: string;
-  border?: boolean;
-  onClick?: () => any;
-  className?: string;
-  small?: boolean;
-}
-
 const DrawerItem = (props: DrawerItemProps) => {
   const { icon, text, border, href, target, onClick, className } = props;
 
@@ -219,11 +202,8 @@ const DrawerItem = (props: DrawerItemProps) => {
   }
 };
 
-const AuthItem: React.FC<{
-  session: Session | null;
-  signIn: () => void;
-  signOut: () => void;
-}> = ({ signIn, signOut, session }) => {
+const AuthItem: React.FC<AuthItemProps> = (props) => {
+  const { session, signIn, signOut } = props;
   const icon = session?.user ? <FaSignInAlt /> : <FaSignOutAlt />;
   const text = session?.user ? "Sign Out" : "Sign In";
   const onClick = session?.user ? signOut : signIn;
@@ -231,11 +211,8 @@ const AuthItem: React.FC<{
   return <DrawerItem icon={icon} text={text} onClick={onClick} />;
 };
 
-const ProItem: React.FC<{
-  session: Session | null;
-  sub: () => any;
-  manage: () => any;
-}> = ({ sub, manage, session }) => {
+const ProItem: React.FC<ProItemProps> = (props) => {
+  const { session, sub, manage } = props;
   const text = session?.user?.subscriptionId ? "Account" : "Go Pro";
   let icon = session?.user ? <FaUser /> : <FaRocket />;
   if (session?.user?.image) {
