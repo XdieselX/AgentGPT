@@ -1,4 +1,4 @@
-import type { ModelSettings } from "./types";
+import type { ModelSettings } from "../components";
 import { OpenAIApi } from "openai";
 import { Config } from "../hooks/useConfig";
 

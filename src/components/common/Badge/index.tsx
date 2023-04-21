@@ -1,11 +1,9 @@
 import React from "react";
 import clsx from "clsx";
+import { BadgeProps } from "./index.props";
 
-interface BadgeProps {
-  children: React.ReactNode;
-}
-
-export const Badge = ({ children }: BadgeProps) => {
+export const Badge = (props: BadgeProps) => {
+  const { children } = props;
   return (
     <div
       className={clsx(

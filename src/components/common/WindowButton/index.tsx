@@ -1,14 +1,9 @@
-import { PopIn } from "../..";
 import React from "react";
+import { PopIn } from "../..";
+import { WindowButtonProps } from "./index.props";
 
-type WindowButtonProps = {
-  delay: number;
-  onClick: () => void;
-  icon: React.ReactNode;
-  text: string;
-};
-
-const WindowButton = ({ delay, onClick, icon, text }: WindowButtonProps) => {
+const WindowButton = (props: WindowButtonProps) => {
+  const { delay, onClick, icon, text } = props;
   return (
     <PopIn delay={delay}>
       <div
@@ -22,6 +17,6 @@ const WindowButton = ({ delay, onClick, icon, text }: WindowButtonProps) => {
   );
 };
 
-export { 
+export {
     WindowButton
 };

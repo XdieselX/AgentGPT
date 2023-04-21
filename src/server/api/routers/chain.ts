@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { startGoalAgent } from "../../../utils";
 
 export const chainRouter = createTRPCRouter({
   startAgent: publicProcedure

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { RequestBody } from "../../utils";
-import { createAgent } from "../../services/agent-service";
+import AgentService from "../../services/agent-service";
 
 export const config = {
   runtime: "edge",
@@ -16,15 +16,14 @@ const handler = async (request: NextRequest) => {
       return;
     }
 
-    const newTasks = await createAgent(
+    const newTasks = await AgentService.createTasksAgent(
       modelSettings,
       goal,
       tasks,
       lastTask,
       result,
       completedTasks
-    ); 
-    
+    );
     // Remove duplicates
 
     return NextResponse.json({ newTasks });

@@ -2,22 +2,10 @@ import { useState } from "react";
 import { Combobox as ComboboxPrimitive } from "@headlessui/react";
 import { FaChevronDown } from "react-icons/fa";
 import clsx from "clsx";
+import { ComboboxProps } from "./index.props";
 
-interface ComboboxProps {
-  value: string;
-  options: string[];
-  left?: boolean;
-  disabled?: boolean;
-  onChange: (value: string) => void;
-}
-
-const Combobox = ({
-  options,
-  value,
-  left = true,
-  disabled,
-  onChange,
-}: ComboboxProps) => {
+const Combobox = (props: ComboboxProps) => {
+  const { options, value, onChange, disabled, left } = props;
   const [query, setQuery] = useState("");
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (

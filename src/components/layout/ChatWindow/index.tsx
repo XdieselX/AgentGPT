@@ -1,48 +1,47 @@
-import type { ReactNode } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import {
   FaBrain,
   FaClipboard,
+  FaCopy,
+  FaDatabase,
+  FaImage,
   FaListAlt,
   FaPlayCircle,
   FaSave,
   FaStar,
-  FaCopy,
-  FaImage
 } from "react-icons/fa";
+import clsx from "clsx";
 import * as htmlToImage from "html-to-image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import { useRouter } from "next/router";
-import autoAnimate from "@formkit/auto-animate";
 import {
   WindowButton,
   PDFButton,
   FadeIn,
   Button,
   Expand,
-  PopIn
+  PopIn,
+  Message
 } from "../..";
+import autoAnimate from "@formkit/auto-animate";
 import { clientEnv } from "../../../env/schema.mjs";
-
-interface ChatWindowProps extends HeaderProps {
-  children?: ReactNode;
-  className?: string;
-  messages: Message[];
-  showDonation: boolean;
-}
+import { ChatWindowProps, HeaderProps } from "./index.props";
 
 const messageListId = "chat-window-message-list";
 
 const ChatWindow = (props: ChatWindowProps) => {
-  const { 
-    messages, 
-    children, 
+  const {
+    messages,
+    children,
     className,
     title,
-    showDonation
+    showDonation,
+    onSave,
+    fullscreen,
+    scrollToBottom
   } = props;
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -60,7 +59,7 @@ const ChatWindow = (props: ChatWindowProps) => {
 
   useEffect(() => {
     // Scroll to bottom on re-renders
-    if (scrollRef && scrollRef.current) {
+    if (scrollToBottom && scrollRef && scrollRef.current) {
       if (!hasUserScrolled) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
@@ -74,9 +73,13 @@ const ChatWindow = (props: ChatWindowProps) => {
         (className ?? "")
       }
     >
-      <MacWindowHeader title={title} messages={messages}/>
+      <MacWindowHeader title={title} messages={messages} onSave={onSave}/>
       <div
-        className="window-heights mb-2 mr-2"
+        className={clsx(
+          "mb-2 mr-2 ",
+          (fullscreen && "max-h-[75vh] flex-grow overflow-auto") ||
+            "window-heights"
+        )}
         ref={scrollRef}
         onScroll={handleScroll}
         id={messageListId}
@@ -88,10 +91,6 @@ const ChatWindow = (props: ChatWindowProps) => {
 
         {messages.length === 0 && (
           <>
-            { false &&<Expand delay={0.7} type="spring">
-              <DonationMessage />
-              </Expand>
-            }
             <Expand delay={0.8} type="spring">
               <ChatMessage
                 message={{
@@ -121,11 +120,6 @@ const ChatWindow = (props: ChatWindowProps) => {
     </div>
   );
 };
-
-interface HeaderProps {
-  title?: string | ReactNode;
-  messages: Message[];
-}
 
 const MacWindowHeader = (props : HeaderProps) => {
   const saveElementAsImage = (elementId: string) => {
@@ -176,17 +170,25 @@ const MacWindowHeader = (props : HeaderProps) => {
       <div className="flex flex-grow font-mono text-sm font-bold text-gray-600 sm:ml-2">
         {props.title}
       </div>
-      <WindowButton 
-        delay={0.7}
-        onClick={(): void => saveElementAsImage(messageListId)}
-        icon={<FaImage size={12} />}
-        text={"Save As Image"}
-      />
+      {props.onSave && (
+        <WindowButton
+          delay={0.8}
+          onClick={() => props.onSave?.("db")}
+          icon={<FaSave size={12} />}
+          text={"Save"}
+        />
+      )}
       <WindowButton
         delay={0.8}
         onClick={(): void => copyElementText(messageListId)}
         icon={<FaClipboard size={12} />}
-        text={"Copy Text"}
+        text={"Copy to Clipboard"}
+      />
+      <WindowButton
+        delay={0.7}
+        onClick={(): void => saveElementAsImage(messageListId)}
+        icon={<FaImage size={12} />}
+        text={"Save as Image"}
       />
       <PDFButton messages={props.messages}/>
     </div>
@@ -196,7 +198,7 @@ const MacWindowHeader = (props : HeaderProps) => {
 const ChatMessage = ({ message }: { message: Message }) => {
   const [showCopy, setShowCopy] = useState(false);
   const [copied, setCopied] = useState(false);
-  
+
   const handleCopyClick = () => {
     void navigator.clipboard.writeText(message.value);
     setCopied(true);
@@ -319,10 +321,7 @@ const getMessagePrefix = (message: Message) => {
   }
 };
 
-export interface Message {
-  type: "goal" | "thinking" | "task" | "action" | "system" | "approval";
-  info?: string;
-  value: string;
-}
-
-export { ChatWindow, ChatMessage };
+export {
+  ChatWindow,
+  ChatMessage
+};

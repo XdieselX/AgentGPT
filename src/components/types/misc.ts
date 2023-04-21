@@ -3,7 +3,7 @@ export type ModelSettings = {
   customModelName: string;
   customTemperature: number;
   customMaxLoops: number;
-  maxTokens: string;
+  maxTokens: number;
 };
 
 export type Goal = {

@@ -7,12 +7,13 @@ export type reactModelStates = {
     setCustomTemperature: (temperature: number) => void;
     customMaxLoops: number;
     setCustomMaxLoops: (numberOfLoops: number) => void;
-    maxTokens: string;
-    setMaxTokens: (maxTokens: string) => void;
-}
-
-export interface SettingsDialogProps {
+    maxTokens: number;
+    setMaxTokens: (maxTokens: number) => void;
+  }
+  
+  export interface SettingsDialogProps {
     show: boolean;
     close: () => void;
     reactModelStates: reactModelStates;
-}
+  }
+  

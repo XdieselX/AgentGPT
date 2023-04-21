@@ -1,8 +1,7 @@
 import { createTRPCRouter } from "./trpc";
-import { 
+import {
   accountRouter,
   agentRouter,
-  chainRouter,
   exampleRouter,
 } from "./routers";
 
@@ -14,7 +13,6 @@ import {
 export const appRouter = createTRPCRouter({
   account: accountRouter,
   agent: agentRouter,
-  chain: chainRouter,
   example: exampleRouter,
 });
 
