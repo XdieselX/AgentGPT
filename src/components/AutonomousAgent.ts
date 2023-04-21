@@ -1,3 +1,4 @@
+import type { Session } from "next-auth";
 import type { Message, ModelSettings } from ".";
 import type { AxiosError } from "axios";
 import axios from "axios";
@@ -8,7 +9,8 @@ import {
   DEFAULT_MAX_LOOPS_PAID,
 } from "../utils"
 import { env } from "../env/client.mjs";
-import type { Session } from "next-auth";
+import { v4 } from "uuid";
+import { RequestBody } from "../utils";
 
 const TIMEOUT_LONG = 1000;
 const TIMEOUT_SHORT = 800;
@@ -24,6 +26,7 @@ class AutonomousAgent {
   shutdown: () => void;
   numLoops = 0;
   session?: Session;
+  _id: string;
 
   constructor(
     name: string,
@@ -33,6 +36,7 @@ class AutonomousAgent {
     modelSettings: ModelSettings,
     session?: Session
   ) {
+    this._id = v4();
     this.name = name;
     this.goal = goal;
     this.renderMessage = renderMessage;
@@ -144,10 +148,11 @@ class AutonomousAgent {
       return await AgentService.startGoalAgent(this.modelSettings, this.goal);
     }
 
-    const res = await axios.post(`/api/start`, {
+    const data = {
       modelSettings: this.modelSettings,
       goal: this.goal,
-    });
+    }
+    const res = await this.post(`/api/start`, data);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
     return res.data.newTasks as string[];
@@ -168,14 +173,16 @@ class AutonomousAgent {
       );
     }
 
-    const res = await axios.post(`/api/create`, {
+    const data = {
       modelSettings: this.modelSettings,
       goal: this.goal,
       tasks: this.tasks,
       lastTask: currentTask,
       result: result,
       completedTasks: this.completedTasks,
-    });
+    }
+
+    const res = await this.post(`/api/create`, data);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
     return res.data.newTasks as string[];
   }
@@ -185,7 +192,7 @@ class AutonomousAgent {
       return await AgentService.executeTaskAgent(this.modelSettings, this.goal, task);
     }
 
-    const res = await axios.post(`/api/execute`, {
+    const res = await this.post(`/api/execute`, {
       modelSettings: this.modelSettings,
       goal: this.goal,
       task: task,
@@ -274,19 +281,34 @@ class AutonomousAgent {
       value: "",
     });
   }
+
+  private async post(url: string, data: RequestBody) {
+    try {
+      return await axios.post(url, data);
+    } catch (e) {
+      this.shutdown();
+
+      if (axios.isAxiosError(e) && e.response?.status === 429) {
+        this.sendErrorMessage("Rate limit exceeded. Please slow down. 😅");
+      }
+
+      throw e;
+    }
+  }
 }
 
 const testConnection = async (modelSettings: ModelSettings) => {
   // A dummy connection to see if the key is valid
   // Can't use LangChain / OpenAI libraries to test because they have retries in place
+  const data = {
+    model: modelSettings.customModelName,
+    messages: [{ role: "user", content: "Say this is a test" }],
+    max_tokens: 7,
+    temperature: 0,
+  }
   return await axios.post(
     "https://api.openai.com/v1/chat/completions",
-    {
-      model: modelSettings.customModelName,
-      messages: [{ role: "user", content: "Say this is a test" }],
-      max_tokens: 7,
-      temperature: 0,
-    },
+    data,
     {
       headers: {
         "Content-Type": "application/json",
@@ -312,5 +334,7 @@ const getMessageFromError = (e: unknown) => {
   }
   return message;
 };
+
+
 
 export default AutonomousAgent;

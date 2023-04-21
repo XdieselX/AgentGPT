@@ -1,6 +1,7 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import { GoogleAnalytics } from "nextjs-google-analytics";
 
 import { api } from "../utils";
 
@@ -17,6 +18,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <SessionProvider session={session}>
         <Component {...pageProps} />
         <Analytics />
+        <GoogleAnalytics />
       </SessionProvider>
       <Toaster />
     </>
