@@ -23,7 +23,8 @@ import {
   FadeIn,
   Button,
   Expand,
-  PopIn
+  PopIn,
+  Message
 } from "../..";
 import { clientEnv } from "../../../env/schema.mjs";
 import { ChatMessageProps, ChatWindowProps, HeaderProps } from "./index.props";
@@ -308,11 +309,5 @@ const getMessagePrefix = (message: Message) => {
       return "Waiting for Approval...";
   }
 };
-
-export interface Message {
-  type: "goal" | "thinking" | "task" | "action" | "system" | "approval";
-  info?: string;
-  value: string;
-}
 
 export { ChatWindow, ChatMessage };
