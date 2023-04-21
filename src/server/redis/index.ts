@@ -1,6 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
-import { env } from "../env/server.mjs";
+import { env } from "../../env/server.mjs";
 
 const redis = new Redis({
   url: env.UPSTASH_REDIS_REST_URL ?? "",
