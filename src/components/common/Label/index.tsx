@@ -1,14 +1,10 @@
 import React from "react";
-import { toolTipProperties } from "../../types";
 import { Tooltip } from "../..";
+import { LabelProps } from "./index.props";
 
-interface LabelProps {
-  left?: React.ReactNode;
-  type?: string;
-  toolTipProperties?: toolTipProperties;
-}
 
-const Label = ({ type, left, toolTipProperties }: LabelProps) => {
+const Label = (props: LabelProps) => {
+  const { left, type, toolTipProperties } = props;
   return (
     <Tooltip
       child={

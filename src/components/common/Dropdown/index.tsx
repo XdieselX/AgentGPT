@@ -1,22 +1,10 @@
 import React from "react";
 import { Label } from "..";
 import clsx from "clsx";
+import { DropdownProps } from "./index.props";
 
-interface DropdownProps {
-  left?: React.ReactNode;
-  value: string;
-  options: string[];
-  disabled?: boolean;
-  setCustomModelName: (key: string) => void;
-}
-
-export const Dropdown = ({
-  options,
-  left,
-  value,
-  disabled,
-  setCustomModelName,
-}: DropdownProps) => {
+export const Dropdown = (props: DropdownProps) => {
+  const { left, value, disabled, options, setCustomModelName } = props;
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOptionClick = (option: string) => {

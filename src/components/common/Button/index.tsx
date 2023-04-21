@@ -4,17 +4,7 @@ import {
   Loader 
 } from "..";
 import clsx from "clsx";
-
-export interface ButtonProps {
-  type?: "button" | "submit" | "reset";
-  className?: string;
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
-  loader?: boolean;
-  disabled?: boolean;
-  enabledClassName?: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
-}
+import { ButtonProps } from "./index.props";
 
 const Button = forwardRef(
   (props: ButtonProps, ref: ForwardedRef<HTMLButtonElement>) => {

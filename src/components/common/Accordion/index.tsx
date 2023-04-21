@@ -1,12 +1,10 @@
 import { Disclosure as AccordionPrimitive } from "@headlessui/react";
 import { FaChevronDown } from "react-icons/fa";
+import { AccordionProps } from "./index.props";
 
-interface AccordionProps {
-  child: React.ReactNode;
-  name: string;
-}
 
-const Accordion = ({ child, name }: AccordionProps) => {
+const Accordion = (props: AccordionProps) => {
+  const { name, child } = props;
   return (
     <AccordionPrimitive>
       {({ open }) => (

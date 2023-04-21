@@ -1,20 +1,14 @@
 import React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import type { toolTipProperties } from "../..";
+import { TooltipProps } from "./index.props";
 
-interface TooltipProps {
-  child: React.ReactNode;
-  toolTipProperties?: toolTipProperties;
-  style?: { [key: string]: string };
-  sideOffset: number;
-}
-
-const Tooltip = ({
-  child,
-  toolTipProperties = { message: "", disabled: true },
-  style = { container: "" },
-  sideOffset,
-}: TooltipProps) => {
+const Tooltip = (props: TooltipProps) => {
+  const {
+    child,
+    toolTipProperties = { message: "", disabled: true },
+    style = { container: "" },
+    sideOffset,
+  } = props;
   const { message, disabled } = toolTipProperties;
   return (
     <div className={style.container}>

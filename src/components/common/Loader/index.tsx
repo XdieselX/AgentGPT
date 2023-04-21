@@ -1,18 +1,13 @@
 import { Ring } from "@uiball/loaders";
+import { LoaderProps } from "./index.props";
 
-interface LoaderProps {
-  className?: string;
-  size?: number;
-  speed?: number;
-  lineWeight?: number;
-}
-
-const Loader: React.FC<LoaderProps> = ({
-  className,
-  size = 16,
-  speed = 2,
-  lineWeight = 7,
-}) => {
+const Loader: React.FC<LoaderProps> = (props) => {
+  const {
+    className,
+    size = 16,
+    speed = 2,
+    lineWeight = 7,
+  } = props
   return (
     <div className={className}>
       <Ring size={size} speed={speed} color="white" lineWeight={lineWeight} />

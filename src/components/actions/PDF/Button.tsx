@@ -4,8 +4,10 @@ import { pdf } from "@react-pdf/renderer";
 import React from "react";
 import type { Message } from "../..";
 import MyDocument from "./MyDocument";
+import { PDFButtonProps } from "./index.props";
 
-const PDFButton = ({ messages }: { messages: Message[] }) => {
+const PDFButton = (props: PDFButtonProps) => {
+  const { messages } = props;
   const content = getContent(messages);
 
   const downloadPDF = async () => {

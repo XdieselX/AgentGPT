@@ -5,20 +5,7 @@ import {
 } from ".."
 import clsx from "clsx";
 import { isArrayOfType } from "../../../utils";
-import { toolTipProperties } from "../../types";
-
-interface InputProps {
-  left?: React.ReactNode;
-  value: string | number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  setValue?: (value: string) => void;
-  type?: "text" | "combobox" | "range";
-  attributes?: { [key: string]: string | number | string[] };
-  toolTipProperties?: toolTipProperties;
-  inputRef?: React.RefObject<HTMLInputElement>;
-}
+import { InputProps } from "./index.props";
 
 export const Input = (props: InputProps) => {
   const {

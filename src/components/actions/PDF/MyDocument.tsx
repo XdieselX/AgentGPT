@@ -24,10 +24,10 @@ interface MyDocumentProps {
   content: string;
 }
 
-const MyDocument: React.FC<MyDocumentProps> = ({ content }) => (
+const MyDocument: React.FC<MyDocumentProps> = (props: MyDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <Text style={styles.section}>{content}</Text>
+      <Text style={styles.section}>{props.content}</Text>
     </Page>
   </Document>
 );
