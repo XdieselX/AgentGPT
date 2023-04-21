@@ -2,7 +2,7 @@ import React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { TooltipProps } from "./index.props";
 
-const Tooltip = (props: TooltipProps) => {
+const Tooltip = (props : TooltipProps) => {
   const {
     child,
     toolTipProperties = { message: "", disabled: true },
@@ -33,5 +33,5 @@ const Tooltip = (props: TooltipProps) => {
 };
 
 export {
-    Tooltip
+  Tooltip
 };

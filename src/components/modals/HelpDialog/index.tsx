@@ -28,19 +28,14 @@ export function HelpDialog(props: HelpDialogProps) {
         <div className="mt-4 flex w-full items-center justify-center gap-5">
           <div
             className="cursor-pointer rounded-full bg-black/30 p-3 hover:bg-black/70"
-            onClick={() =>
-              window.open("https://discord.gg/jdSBAnmdnY", "_blank")
-            }
+            onClick={() => window.open("", "_blank")}
           >
             <FaDiscord size={30} />
           </div>
           <div
             className="cursor-pointer rounded-full bg-black/30 p-3 hover:bg-black/70"
             onClick={() =>
-              window.open(
-                "https://twitter.com/asimdotshrestha/status/1644883727707959296",
-                "_blank"
-              )
+              window.open("","_blank")
             }
           >
             <FaTwitter size={30} />
@@ -48,7 +43,7 @@ export function HelpDialog(props: HelpDialogProps) {
           <div
             className="cursor-pointer rounded-full bg-black/30 p-3 hover:bg-black/70"
             onClick={() =>
-              window.open("https://github.com/reworkd/AgentGPT", "_blank")
+              window.open("", "_blank")
             }
           >
             <FaGithub size={30} />

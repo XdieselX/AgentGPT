@@ -1,11 +1,10 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
-import type { Dispatch, SetStateAction } from "react";
 import React from "react";
 import clsx from "clsx";
 import { ToastProps } from "./index.props";
 
 const Toast = (props: ToastProps) => {
-  const { title, model, className, description, onAction } = props;
+  const { className, model, title, description, onAction } = props;
   const [open, setOpen] = props.model;
 
   return (
@@ -23,13 +22,14 @@ const Toast = (props: ToastProps) => {
           "radix-swipe-direction-down:radix-swipe-end:animate-toast-swipe-out-y",
           "radix-swipe-direction-down:translate-y-radix-toast-swipe-move-y",
           "radix-swipe-cancel:translate-x-0 radix-swipe-cancel:duration-200 radix-swipe-cancel:ease-[ease]",
-          "focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75"
+          "focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75",
+          className
         )}
       >
         <div className="flex">
           <div className="flex w-0 flex-1 items-center py-4 pl-5">
             <div className="radix w-full">
-              <ToastPrimitive.Title className="text-lg font-medium text-white">
+              <ToastPrimitive.Title className="font-mono text-lg font-medium text-white">
                 {title}
               </ToastPrimitive.Title>
               {description && (
@@ -63,10 +63,11 @@ const Toast = (props: ToastProps) => {
           </div>
         </div>
       </ToastPrimitive.Root>
-
       <ToastPrimitive.Viewport />
     </ToastPrimitive.Provider>
   );
 };
 
-export default Toast;
+export {
+  Toast
+};

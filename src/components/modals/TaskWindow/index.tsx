@@ -4,7 +4,10 @@ import {
   FadeIn, 
   Expand 
 } from "../..";
-import { TaskProps, TaskWindowProps } from "./index.props";
+import { 
+  TaskProps, 
+  TaskWindowProps 
+} from "./index.props";
 
 export const TaskWindow = (props: TaskWindowProps) => {
   const { tasks } = props;

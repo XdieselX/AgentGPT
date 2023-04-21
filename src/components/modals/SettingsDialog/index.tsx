@@ -1,36 +1,39 @@
 import React from "react";
-import { 
-  FaKey, 
-  FaMicrochip, 
+import {
+  FaKey,
+  FaMicrochip,
   FaExclamationCircle,
   FaThermometerFull,
   FaSyncAlt
 } from "react-icons/fa";
-import { 
+import {
   Accordion,
-  Button, 
+  Button,
   Dialog,
   Dropdown,
   Input,
 } from "../..";
-import { 
-  GPT_4, 
+import {
+  GPT_4,
   GPT_35_TURBO,
   GPT_MODEL_NAMES,
   DEFAULT_MAX_LOOPS_CUSTOM_API_KEY,
   DEFAULT_MAX_LOOPS_FREE,
-  DEFAULT_MAX_LOOPS_PAID
+  DEFAULT_MAX_LOOPS_PAID,
+  isValidKey
 } from "../../../utils";
 import { SettingsDialogProps } from "./index.props";
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 export function SettingsDialog(props : SettingsDialogProps) {
-  
+
   const {
     show,
     close,
     reactModelStates
   } = props;
-  
+
   const {
     customApiKey,
     setCustomApiKey,
@@ -52,8 +55,28 @@ export function SettingsDialog(props : SettingsDialogProps) {
   };
 
   const handleSave = () => {
-    setCustomApiKey(key);
-    close();
+    if(isValidKey(key)) {
+      setCustomApiKey(key);
+      close();
+    } else {
+      confirmAlert({
+        title: 'Invalid API key',
+        message: "Are you sure you want to continue? If yes, the api key will be emptied.",
+        buttons: [
+          {
+            label: 'Yes',
+            onClick: () => {
+              setCustomApiKey("");
+              close();
+            }
+          },
+          {
+            label: 'No',
+            onClick: () => {}
+          }
+        ]
+      });
+    }
   };
 
   React.useEffect(() => {
@@ -72,14 +95,14 @@ export function SettingsDialog(props : SettingsDialogProps) {
         left={
           <>
             <FaThermometerFull />
-            <span className="ml-2">Temp: </span>
+            <span className="ml-2">Temperature: </span>
           </>
         }
         value={customTemperature}
         onChange={(e) => setCustomTemperature(parseFloat(e.target.value))}
         type="range"
         toolTipProperties={{
-          message: "Higher temperature will make output more random",
+          message: "Higher temperature will make output more random, while lower temperature will make output more focused and deterministic.",
           disabled: false,
         }}
         attributes={{
@@ -111,10 +134,31 @@ export function SettingsDialog(props : SettingsDialogProps) {
           step: 1,
         }}
       />
+      <br />
+      <Input
+        left={
+          <>
+            <FaSyncAlt />
+            <span className="ml-2">Max Tokens: </span>
+          </>
+        }
+        value={maxTokens}
+        onChange={(e) => setMaxTokens(parseFloat(e.target.value))}
+        type="range"
+        disabled={!key}
+        toolTipProperties={{
+          message:
+            "Controls the maximum number of tokens that the agent will generate (higher value will make more API calls).",
+          disabled: false,
+        }}
+        attributes={{
+          min: 250,
+          max: 1500,
+          step: 10,
+        }}
+      />
     </>
   );
-
-
 
   return (
     <Dialog

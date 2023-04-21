@@ -1,5 +1,5 @@
 import React from "react";
-import { 
+import {
   Label,
   Combobox
 } from ".."
@@ -18,17 +18,20 @@ export const Input = (props: InputProps) => {
     disabled,
     attributes,
     inputRef,
-    toolTipProperties
+    toolTipProperties,
+    onKeyDown
   } = props;
 
   const isTypeCombobox = () => type === "combobox";
 
   const isTypeRange = () => type === "range";
 
+  const isTypeTextArea = () => type === "textarea";
+
   let inputElement;
   const options = attributes?.options;
   if (
-    isTypeCombobox() && 
+    isTypeCombobox() &&
     isArrayOfType(options, "string") &&
     setValue !== undefined &&
     typeof value === "string"
@@ -39,6 +42,22 @@ export const Input = (props: InputProps) => {
         options={options}
         disabled={disabled}
         onChange={setValue}
+      />
+    );
+  } else if (isTypeTextArea()) {
+    inputElement = (
+      <textarea
+        className={clsx(
+          "border:black delay-50 w-full resize-none h-20 rounded-xl bg-[#3a3a3a] text-sm tracking-wider outline-0 transition-all placeholder:text-white/20 hover:border-[#1E88E5]/40 focus:border-[#1E88E5] py-3 md:text-lg border-[2px] border-white/10 px-2",
+          disabled && " cursor-not-allowed hover:border-white/10",
+          left && "md:rounded-l-none"
+        )}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        onKeyDown={onKeyDown}
+        {...attributes}
       />
     );
   }
@@ -59,13 +78,14 @@ export const Input = (props: InputProps) => {
         value={value}
         onChange={onChange}
         disabled={disabled}
+        onKeyDown={onKeyDown}
         {...attributes}
       />
     );
   }
-        
+
   return (
-    <div 
+    <div
       className={`items-left z-10 flex w-full flex-col rounded-xl font-mono text-lg text-white/75 shadow-xl md:flex-row md:items-center md:bg-[#3a3a3a] ${
         isTypeRange() ? "md: border-white/10 md:border-[2px]" : ""
       } shadow-xl md:flex-row md:items-center`}

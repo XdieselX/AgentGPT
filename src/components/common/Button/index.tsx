@@ -1,8 +1,6 @@
 import type { ForwardedRef } from "react";
 import React, { forwardRef, useState } from "react";
-import {
-  Loader 
-} from "..";
+import { Loader } from "..";
 import clsx from "clsx";
 import { ButtonProps } from "./index.props";
 

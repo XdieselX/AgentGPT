@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  FaAccessibleIcon,
   FaBars,
   FaCog,
   FaDiscord,
@@ -13,7 +12,6 @@ import {
   FaTwitter,
   FaUser,
 } from "react-icons/fa";
-import { BiPlus } from "react-icons/bi";
 import clsx from "clsx";
 import { useAuth } from "../../../hooks/useAuth";
 import type { Session } from "next-auth";
@@ -37,7 +35,7 @@ export const Drawer = (props: DrawerProps) => {
   });
 
   const query = api.agent.getAll.useQuery( undefined, {
-    enabled: session?.user.role === "ADMIN" || true, //FIXME - remove true
+    enabled: !!session?.user || true, //FIXME - remove true
   });
 
   const manage = api.account.manage.useMutation({
@@ -52,6 +50,8 @@ export const Drawer = (props: DrawerProps) => {
   const toggleDrawer = () => {
     setShowDrawer((prevState) => !prevState);
   };
+
+  console.log(env.NEXT_PUBLIC_FF_AUTH_ENABLED)
 
   return (
     <>
@@ -73,13 +73,7 @@ export const Drawer = (props: DrawerProps) => {
       >
         <div className="flex flex-col gap-1 overflow-hidden">
           <div className="mb-2 flex justify-center gap-2">
-            <DrawerItem
-              className="flex-grow"
-              icon={<BiPlus />}
-              border
-              text="New Agent"
-              onClick={() => location.reload()}
-            />
+            My Agent(s)
             <button
               className="z-40 rounded-md border-2 border-white/20 bg-zinc-900 p-2 text-white hover:bg-zinc-700 md:hidden"
               onClick={toggleDrawer}
@@ -88,21 +82,25 @@ export const Drawer = (props: DrawerProps) => {
             </button>
           </div>
           {/*{TODO: enable for crud}*/}
-          <ul>
-            {userAgents.map((agent, index) => (
+          <ul className="flex flex-col gap-2 overflow-auto">
+            {userAgents.map((agent, index : number) => (
               <DrawerItem
                 key={index}
                 icon={<FaRobot />}
                 text={agent.name}
-                className={""}
-                onClick={() => void router.push(`/agent/${agent.id}`)}
+                className="w-full"
+                onClick={() => void router.push(`/agent?id=${agent.id}`)}
               />
             ))}
-
-            {userAgents.length === 0 && (
+            {status === "unauthenticated" && (
               <div>
-                Click the above button to restart. In the future, this will be a
-                list of your deployed agents!
+                Sign in to be able to save agents and manage your account!
+              </div>
+            )}
+            {status === "authenticated" && userAgents.length === 0 && (
+              <div>
+                You need to create and save your first agent before anything
+                shows up here!
               </div>
             )}
           </ul>
@@ -110,12 +108,6 @@ export const Drawer = (props: DrawerProps) => {
 
         <div className="flex flex-col gap-1">
           <hr className="my-5 border-white/20" />
-          {/*<DrawerItem*/}
-          {/*  icon={<FaTrashAlt />}*/}
-          {/*  text="Clear Agents"*/}
-          {/*  onClick={() => setAgents([])}*/}
-          {/*/>*/}
-
           {env.NEXT_PUBLIC_FF_SUB_ENABLED ||
             (router.query.pro && (
               <ProItem
@@ -140,21 +132,24 @@ export const Drawer = (props: DrawerProps) => {
             <DrawerItem
               icon={<FaDiscord size={30}/>}
               text="Discord"
-              href="https://discord.gg/jdSBAnmdnY"
+              //href="https://discord.gg/jdSBAnmdnY"
+              href=""
               target="_blank"
               small
             />
             <DrawerItem
               icon={<FaTwitter size={30} />}
               text="Twitter"
-              href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
+              //href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
+              href=""
               target="_blank"
               small
             />
             <DrawerItem
               icon={<FaGithub size={30}/>}
               text="GitHub"
-              href="https://github.com/reworkd/AgentGPT"
+              //href="https://github.com/reworkd/AgentGPT"
+              href=""
               target="_blank"
               small
             />
@@ -166,7 +161,7 @@ export const Drawer = (props: DrawerProps) => {
 };
 
 const DrawerItem = (props: DrawerItemProps) => {
-  const { icon, text, border, href, target, onClick, className } = props;
+  const { icon, text, border, href, target, onClick, className, small } = props;
 
   if (href) {
     return (
@@ -180,30 +175,30 @@ const DrawerItem = (props: DrawerItemProps) => {
         target={target ?? "_blank"}
       >
         {icon}
-        {!props.small && <span className="text-md ml-4">{text}</span>}
+        {!small && <span className="text-md ml-4">{text}</span>}
         <span className="text-md ml-4">{text}</span>
       </a>
     );
-  } else {
-    return (
-      <button
-        type="button"
-        className={clsx(
-          "flex cursor-pointer flex-row items-center rounded-md rounded-md p-2 hover:bg-white/5",
-          border && "border-[1px] border-white/20",
-          `${className || ""}`
-        )}
-        onClick={onClick}
-      >
-        {icon}
-        <span className="text-md ml-4">{text}</span>
-      </button>
-    );
   }
+  return (
+    <button
+      type="button"
+      className={clsx(
+        "flex cursor-pointer flex-row items-center rounded-md rounded-md p-2 hover:bg-white/5",
+        border && "border-[1px] border-white/20",
+        `${className || ""}`
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      <span className="text-md ml-4">{text}</span>
+    </button>
+  );
+
 };
 
 const AuthItem: React.FC<AuthItemProps> = (props) => {
-  const { session, signIn, signOut } = props;
+  const { signIn, signOut, session } = props;
   const icon = session?.user ? <FaSignInAlt /> : <FaSignOutAlt />;
   const text = session?.user ? "Sign Out" : "Sign In";
   const onClick = session?.user ? signOut : signIn;
@@ -212,7 +207,7 @@ const AuthItem: React.FC<AuthItemProps> = (props) => {
 };
 
 const ProItem: React.FC<ProItemProps> = (props) => {
-  const { session, sub, manage } = props;
+  const { sub, manage, session } = props;
   const text = session?.user?.subscriptionId ? "Account" : "Go Pro";
   let icon = session?.user ? <FaUser /> : <FaRocket />;
   if (session?.user?.image) {
