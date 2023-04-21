@@ -2,10 +2,11 @@ import Handlebars from "handlebars";
 import nodemailer, { Transporter } from "nodemailer";
 import { readFileSync } from "fs";
 import path from "path";
-import { serverEnv } from "../env/schema.mjs";
 import { SendVerificationRequestParams } from "next-auth/providers";
 import { User } from "next-auth";
 import toast from "react-hot-toast";
+import { serverEnv } from "../env/schema.mjs";
+import { getCopyrightTextShort } from "../utils";
 
 const emailsTemplateDir = path.resolve(process.cwd(), 'src/components/template/emails');
 
@@ -46,6 +47,7 @@ const sendWelcomeEmail = async (message: { user: User }) => {
       html: emailTemplate({
         base_url: NEXTAUTH_URL,
         support_email: 'moreezgo@gmail.com',
+        copyright: getCopyrightTextShort()
       }),
     });
     toast.dismiss(toastId);
@@ -78,6 +80,7 @@ const sendVerificationRequest = async (params: SendVerificationRequestParams) =>
         base_url: NEXTAUTH_URL,
         signin_url: url,
         email: identifier,
+        copyright: getCopyrightTextShort()
       }),
     });
     toast.dismiss(toastId);

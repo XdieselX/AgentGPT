@@ -9,4 +9,7 @@ export const DEFAULT_MAX_LOOPS_FREE = 4;
 export const DEFAULT_MAX_LOOPS_PAID = 16;
 
 export const getCopyrightText = () =>
-  `© ${new Date().getFullYear()} GPT, Inc. All rights reserved. Powered by Teizay Dev.`;
+  `© ${new Date().getFullYear()} GPTSmart, Inc. All rights reserved. Powered by Teizay Dev.`;
+
+export const getCopyrightTextShort = () =>
+  `© ${new Date().getFullYear()} GPTSmart, Inc. All rights reserved.`;
