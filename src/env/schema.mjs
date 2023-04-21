@@ -56,7 +56,7 @@ export const serverSchema = z.object({
   EMAIL_SERVER_USER: requiredForProduction(),
   EMAIL_SERVER_PASSWORD: requiredForProduction(),
   EMAIL_FROM: requiredForProduction(),
-
+  
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_SUBSCRIPTION_PRICE_ID: z.string().optional(),
