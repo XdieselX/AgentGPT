@@ -11,6 +11,7 @@ export * from './ComboBox';
 export * from './Dropdown';
 export * from './Input';
 export * from './Label';
+export * from './LanguageCombobox';
 export * from './Loader';
 export * from './Toast';
 export * from './Tooltip';

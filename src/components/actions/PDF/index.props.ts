@@ -6,4 +6,5 @@ export interface MyDocumentProps {
 
 export interface PDFButtonProps {
   messages: Message[];
+  name?: string;
 }

@@ -1,14 +1,18 @@
 import React from "react";
 import { Button } from "../..";
 import { DialogProps } from "./index.props";
+import { useTranslation } from "next-i18next";
+import clsx from "clsx";
 
 export function Dialog(props: DialogProps) {
+  const [t] = useTranslation();
   const {
     header,
     children,
     isShown,
     close,
     footerButton,
+    contentClassName
   } = props;
 
   if (!isShown) {
@@ -39,7 +43,11 @@ export function Dialog(props: DialogProps) {
             </button>
           </div>
           {/*body*/}
-          <div className="text-md relative my-3 max-h-[50vh] flex-auto overflow-y-auto p-3 leading-relaxed">
+          <div className={clsx(
+              "text-md relative max-h-[50vh] flex-auto overflow-y-auto p-3 leading-relaxed",
+              contentClassName
+            )}
+          >
             {children}
           </div>
           {/*footer*/}
@@ -48,7 +56,7 @@ export function Dialog(props: DialogProps) {
               enabledClassName="bg-yellow-600 hover:bg-yellow-500"
               onClick={close}
             >
-              Close
+              {t('Close')}
             </Button>
             {footerButton}
           </div>

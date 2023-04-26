@@ -1,5 +1,6 @@
 import React from "react";
 import { Document, Page, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { MyDocumentProps } from "./index.props";
 
 Font.register({
   family: "Roboto",
@@ -19,10 +20,6 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
 });
-
-interface MyDocumentProps {
-  content: string;
-}
 
 const MyDocument: React.FC<MyDocumentProps> = (props: MyDocumentProps) => (
   <Document>

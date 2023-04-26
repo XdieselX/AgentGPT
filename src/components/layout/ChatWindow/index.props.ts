@@ -18,4 +18,5 @@ export interface ChatWindowProps extends HeaderProps {
 
 export interface ChatMessageProps {
   message: Message;
+  className?: string;
 }

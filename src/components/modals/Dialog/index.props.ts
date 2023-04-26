@@ -4,4 +4,5 @@ export interface DialogProps {
     isShown: boolean;
     close: () => void;
     footerButton?: React.ReactNode;
+    contentClassName?: string;
 }

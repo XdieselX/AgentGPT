@@ -1,7 +1,10 @@
 import { type NextPage } from "next";
-import DefaultLayout from "../../layout/default";
 import React, { useState } from "react";
 import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
+import { FaTrash, FaShare, FaBackspace } from "react-icons/fa";
+
+import DefaultLayout from "../../layout/default";
 import { api } from "../../utils";
 import {
   Button,
@@ -9,10 +12,10 @@ import {
   Toast,
 } from "../../components";
 import type { Message } from "../../components";
-import { FaTrash, FaShare, FaBackspace } from "react-icons/fa";
 import { env } from "../../env/client.mjs";
 
 const AgentPage: NextPage = () => {
+  const [ t ] = useTranslation();
   const [showCopied, setShowCopied] = useState(false);
   const router = useRouter();
 
@@ -73,7 +76,7 @@ const AgentPage: NextPage = () => {
       </div>
       <Toast
         model={[showCopied, setShowCopied]}
-        title="Copied to clipboard! 🚀"
+        title={t("Copied to clipboard! 🚀")}
         className="bg-gray-950 text-sm"
       />
     </DefaultLayout>

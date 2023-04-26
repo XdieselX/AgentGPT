@@ -2,8 +2,10 @@ import * as ToastPrimitive from "@radix-ui/react-toast";
 import React from "react";
 import clsx from "clsx";
 import { ToastProps } from "./index.props";
+import { useTranslation } from "next-i18next";
 
 const Toast = (props: ToastProps) => {
+  const [t] = useTranslation();
   const { className, model, title, description, onAction } = props;
   const [open, setOpen] = props.model;
 
@@ -53,11 +55,11 @@ const Toast = (props: ToastProps) => {
                     setOpen(false);
                   }}
                 >
-                  Copy
+                  {t('Copy')}
                 </ToastPrimitive.Action>
               )}
               <ToastPrimitive.Close className="text-md flex w-full items-center justify-center rounded-2xl border border-transparent px-3 py-2 font-medium text-white hover:bg-white/20 ">
-                Close
+                {t('Close')}
               </ToastPrimitive.Close>
             </div>
           </div>

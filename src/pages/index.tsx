@@ -1,5 +1,6 @@
-import { type NextPage } from "next";
+import { type NextPage, type GetStaticProps } from "next";
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { FaRobot, FaStar } from "react-icons/fa";
 import { VscLoading } from "react-icons/vsc";
 import { useSession } from "next-auth/react";
@@ -18,14 +19,24 @@ import {
   TaskWindow
 } from "../components";
 import AutonomousAgent from "../components/AutonomousAgent";
-import { api, GPT_35_TURBO, DEFAULT_MAX_LOOPS_FREE } from "../utils";
-import { useAuth } from "../hooks/useAuth";
+import {
+  api,
+  GPT_35_TURBO,
+  DEFAULT_MAX_LOOPS_FREE,
+  isEmptyOrBlank,
+} from "../utils";
 import { env } from "../env/client.mjs";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+//TODO - Make import as single file
+import { useSettings } from "../hooks/useSettings";
+import { useAuth } from "../hooks/useAuth";
 import { useAgent } from "../hooks/useAgent";
 
 
 const Home: NextPage = () => {
+  const [t] = useTranslation();
   const { session, status } = useAuth();
+  const { settings, saveSettings } = useSettings();
   const [name, setName] = React.useState<string>("");
   const [goalInput, setGoalInput] = React.useState<string>("");
   const [agent, setAgent] = React.useState<AutonomousAgent | null>(null);
@@ -79,17 +90,18 @@ const Home: NextPage = () => {
 
   const tasks = messages.filter((m) => m.type === "task");
 
-  const disableDeployAgentButton = agent != null || name.length == 0 || goalInput.length == 0;
+  const disableDeployAgentButton =
+    agent != null ||
+    name.length == 0 ||
+    isEmptyOrBlank(goalInput);
 
   const handleNewGoal = () => {
     const agent = new AutonomousAgent(
-      name,
-      goalInput,
+      name.trim(),
+      goalInput.trim(),
       handleAddMessage,
-      () => setAgent(null),{
-        customApiKey, customModelName,
-        customTemperature, customMaxLoops, maxTokens
-      },
+      () => setAgent(null),
+      settings,
       session ?? undefined
     );
     setAgent(agent);
@@ -99,10 +111,11 @@ const Home: NextPage = () => {
   };
 
   const handleKeyPress = (
-    e: React.KeyboardEvent<HTMLInputElement>
+    e:
+      | React.KeyboardEvent<HTMLInputElement>
       | React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
-    if (e.key === 'Enter' && !disableDeployAgentButton) {
+    if (e.key === "Enter" && !disableDeployAgentButton) {
       if (!e.shiftKey) {
         // Only Enter is pressed, execute the function
         handleNewGoal();
@@ -136,18 +149,7 @@ const Home: NextPage = () => {
         close={() => setShowHelpDialog(false)}
       />
       <SettingsDialog
-        reactModelStates={{
-          customApiKey,
-          setCustomApiKey,
-          customModelName,
-          setCustomModelName,
-          customTemperature,
-          setCustomTemperature,
-          customMaxLoops,
-          setCustomMaxLoops,
-          maxTokens,
-          setMaxTokens,
-        }}
+        customSettings={[settings, saveSettings]}
         show={showSettingsDialog}
         close={() => setShowSettingsDialog(false)}
       />
@@ -181,8 +183,9 @@ const Home: NextPage = () => {
               </div>
               <div className="mt-1 text-center font-mono text-[0.7em] font-bold text-white">
                 <p>
-                  Assemble, configure, and deploy autonomous AI Agents in your
-                  browser.
+                  {t(
+                    "Assemble, configure, and deploy autonomous AI Agents in your browser."
+                  )}
                 </p>
               </div>
             </div>
@@ -198,8 +201,8 @@ const Home: NextPage = () => {
                     ? (format) => {
                         setHasSaved(true);
                         agentUtils.saveAgent({
-                          goal: goalInput,
-                          name: name,
+                          goal: goalInput.trim(),
+                          name: name.trim(),
                           tasks: messages,
                         });
                       }
@@ -217,7 +220,7 @@ const Home: NextPage = () => {
                   left={
                     <>
                       <FaRobot />
-                      <span className="ml-2">Name:</span>
+                      <span className="ml-2">{t("AGENT_NAME")}</span>
                     </>
                   }
                   value={name}
@@ -225,6 +228,7 @@ const Home: NextPage = () => {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="AgentGPT"
                   onKeyDown={handleKeyPress}
+                  type="text"
                 />
               </Expand>
               <Expand delay={1.3}>
@@ -232,13 +236,13 @@ const Home: NextPage = () => {
                   left={
                     <>
                       <FaStar />
-                      <span className="ml-2">Goal:</span>
+                      <span className="ml-2">{t("AGENT_GOAL")}</span>
                     </>
                   }
                   disabled={agent != null}
                   value={goalInput}
                   onChange={(e) => setGoalInput(e.target.value)}
-                  placeholder="Make the world a better place."
+                  placeholder={`${t("Make the world a better place.")}`}
                   onKeyDown={handleKeyPress}
                   type="textarea"
                 />
@@ -252,11 +256,11 @@ const Home: NextPage = () => {
                 className="sm:mt-10"
               >
                 {agent == null ? (
-                  "Deploy Agent"
+                  t("Deploy Agent")
                 ) : (
                   <>
                     <VscLoading className="animate-spin" size={20} />
-                    <span className="ml-2">Running</span>
+                    <span className="ml-2">{t("Running")}</span>
                   </>
                 )}
               </Button>
@@ -270,10 +274,10 @@ const Home: NextPage = () => {
                 {shouldAgentStop ? (
                   <>
                     <VscLoading className="animate-spin" size={20} />
-                    <span className="ml-2">Stopping</span>
+                    <span className="ml-2">{t("Stopping")}</span>
                   </>
                 ) : (
-                  "Stop agent"
+                  t("Stop Agent")
                 )}
               </Button>
             </Expand>
@@ -285,3 +289,32 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+export const getStaticProps: GetStaticProps = async ({ locale = "en" }) => {
+  const supportedLocales = [
+    "en",
+    "hu",
+    "fr",
+    "de",
+    "it",
+    "ja",
+    "zh",
+    "ko",
+    "pl",
+    "pt",
+    "ro",
+    "ru",
+    "uk",
+    "es",
+    "nl",
+    "sk",
+    "hr",
+  ];
+  const chosenLocale = supportedLocales.includes(locale) ? locale : "en";
+
+  return {
+    props: {
+      ...(await serverSideTranslations(chosenLocale, ["translation"])),
+    },
+  };
+};

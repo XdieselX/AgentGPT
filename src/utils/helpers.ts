@@ -17,9 +17,9 @@ const isArrayOfType = <T>(
   );
 };
 
-function isValidKey(key: string) {
+function isValidKey(key: string | undefined) {
   const pattern = /^sk-[a-zA-Z0-9]{48}$/;
-  return pattern.test(key);
+  return key && pattern.test(key);
 }
 
 export const extractTasks = (

@@ -202,7 +202,7 @@ class AutonomousAgent {
   }
 
   private shouldRunClientSide() {
-    return this.modelSettings.customApiKey != "";
+    return !!this.modelSettings.customApiKey;
   }
 
   stopAgent() {
@@ -226,7 +226,7 @@ class AutonomousAgent {
     this.renderMessage({
       type: "system",
       value:
-        this.modelSettings.customApiKey !== ""
+        !!this.modelSettings.customApiKey
           ? `This agent has maxed out on loops. To save your wallet, this agent is shutting down. You can configure the number of loops in the advanced settings.`
           : "We're sorry, because this is a demo, we cannot have our agents running for too long. Note, if you desire longer runs, please provide your own API key in Settings. Shutting down.",
     });
@@ -312,7 +312,7 @@ const testConnection = async (modelSettings: ModelSettings) => {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${modelSettings.customApiKey}`,//might be a problem
+        Authorization: `Bearer ${modelSettings.customApiKey ?? ""}`,//might be a problem
       },
     }
   );
