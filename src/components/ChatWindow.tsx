@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "next-i18next";
 import {
   FaBrain,
   FaClipboard,
@@ -23,8 +24,10 @@ import { useRouter } from "next/router";
 import WindowButton from "./WindowButton";
 import PDFButton from "./pdf/PDFButton";
 import FadeIn from "./motions/FadeIn";
+import Menu from "./Menu";
 import type { Message } from "../types/agentTypes";
 import clsx from "clsx";
+import type { Translation } from "../utils/types";
 
 interface ChatWindowProps extends HeaderProps {
   children?: ReactNode;
@@ -46,6 +49,7 @@ const ChatWindow = ({
   fullscreen,
   scrollToBottom,
 }: ChatWindowProps) => {
+  const [t] = useTranslation();
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -53,11 +57,8 @@ const ChatWindow = ({
     const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
 
     // Use has scrolled if we have scrolled up at all from the bottom
-    if (scrollTop < scrollHeight - clientHeight - 10) {
-      setHasUserScrolled(true);
-    } else {
-      setHasUserScrolled(false);
-    }
+    const hasUserScrolled = scrollTop < scrollHeight - clientHeight - 10;
+    setHasUserScrolled(hasUserScrolled);
   };
 
   useEffect(() => {
@@ -98,10 +99,20 @@ const ChatWindow = ({
           <>
             <Expand delay={0.8} type="spring">
               <ChatMessage
+                className="bg-red-900"
                 message={{
                   type: "system",
-                  value:
-                    "> Create an agent by adding a name / goal, and hitting deploy!",
+                  value: t(
+                    "🚨 We are experiencing exceptional traffic, expect delays and failures if you do not use your own API key🚨"
+                  ),
+                }}
+              />
+              <ChatMessage
+                message={{
+                  type: "system",
+                  value: t(
+                    "> Create an agent by adding a name / goal, and hitting deploy!"
+                  ),
                 }}
               />
             </Expand>
@@ -109,8 +120,7 @@ const ChatWindow = ({
               <ChatMessage
                 message={{
                   type: "system",
-                  value:
-                    "📢 You can provide your own OpenAI API key in the settings tab for increased limits!",
+                  value: `📢 ${t("YOU_CAN_PROVIDE_YOUR_OWN_OPENAI_KEY")}`,
                 }}
               />
               {showDonation && (
@@ -133,6 +143,7 @@ interface HeaderProps {
 }
 
 const MacWindowHeader = (props: HeaderProps) => {
+  const [t] = useTranslation();
   const saveElementAsImage = (elementId: string) => {
     const element = document.getElementById(elementId);
     if (!element) {
@@ -164,11 +175,48 @@ const MacWindowHeader = (props: HeaderProps) => {
     }
 
     const text = element.innerText;
-    void navigator.clipboard.writeText(text);
+
+    if (navigator.clipboard) {
+      void navigator.clipboard.writeText(text);
+    } else {
+      // Fallback to a different method for unsupported browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand("copy");
+        console.log("Text copied to clipboard");
+      } catch (err) {
+        console.error("Unable to copy text to clipboard", err);
+      }
+
+      document.body.removeChild(textArea);
+    }
   };
 
+  const exportOptions = [
+    <WindowButton
+      key="Image"
+      delay={0.1}
+      onClick={(): void => saveElementAsImage(messageListId)}
+      icon={<FaImage size={12} />}
+      name={t("Image")}
+    />,
+    <WindowButton
+      key="Copy"
+      delay={0.15}
+      onClick={(): void => copyElementText(messageListId)}
+      icon={<FaClipboard size={12} />}
+      name={t("Copy")}
+    />,
+    <PDFButton key="PDF" name="PDF" messages={props.messages} />,
+  ];
+
   return (
-    <div className="flex items-center gap-1 overflow-hidden rounded-t-3xl p-3">
+    <div className="flex items-center gap-1 overflow-visible rounded-t-3xl p-3">
       <PopIn delay={0.4}>
         <div className="h-3 w-3 rounded-full bg-red-500" />
       </PopIn>
@@ -180,36 +228,43 @@ const MacWindowHeader = (props: HeaderProps) => {
       </PopIn>
       <Expand
         delay={1}
-        className="flex flex-grow font-mono text-sm font-bold text-gray-600 sm:ml-2 "
+        className="invisible flex flex-grow font-mono text-sm font-bold text-gray-600 sm:ml-2 md:visible"
       >
         {props.title}
       </Expand>
       {props.onSave && (
         <WindowButton
-          delay={0.8}
+          key="Agent"
+          delay={0}
           onClick={() => props.onSave?.("db")}
           icon={<FaSave size={12} />}
-          text={"Save"}
+          name={t("Save")}
+          styleClass={{
+            container: `relative bg-[#3a3a3a] md:w-20 text-center font-mono rounded-lg text-gray/50 border-[2px] border-white/30 font-bold transition-all sm:py-0.5 hover:border-[#1E88E5]/40 hover:bg-[#6b6b6b] focus-visible:outline-none focus:border-[#1E88E5]`,
+          }}
         />
       )}
-      <WindowButton
-        delay={0.7}
-        onClick={(): void => saveElementAsImage(messageListId)}
-        icon={<FaImage size={12} />}
-        text={"Image"}
+      <Menu
+        name={t("Export")}
+        onChange={() => null}
+        items={exportOptions}
+        styleClass={{
+          container: "relative",
+          input: `bg-[#3a3a3a] w-28 animation-duration text-left px-4 text-sm p-1 font-mono rounded-lg text-gray/50 border-[2px] border-white/30 font-bold transition-all sm:py-0.5 hover:border-[#1E88E5]/40 hover:bg-[#6b6b6b] focus-visible:outline-none focus:border-[#1E88E5]`,
+          option: "w-full py-[1px] md:py-0.5",
+        }}
       />
-
-      <WindowButton
-        delay={0.8}
-        onClick={(): void => copyElementText(messageListId)}
-        icon={<FaClipboard size={12} />}
-        text={"Copy"}
-      />
-      <PDFButton messages={props.messages} />
     </div>
   );
 };
-const ChatMessage = ({ message }: { message: Message }) => {
+const ChatMessage = ({
+  message,
+  className,
+}: {
+  message: Message;
+  className?: string;
+}) => {
+  const [t] = useTranslation();
   const [showCopy, setShowCopy] = useState(false);
   const [copied, setCopied] = useState(false);
   const handleCopyClick = () => {
@@ -231,7 +286,10 @@ const ChatMessage = ({ message }: { message: Message }) => {
 
   return (
     <div
-      className="mx-2 my-1 rounded-lg border-[2px] border-white/10 bg-white/20 p-1 font-mono text-sm hover:border-[#1E88E5]/40 sm:mx-4 sm:p-3 sm:text-base"
+      className={clsx(
+        "mx-2 my-1 rounded-lg border-[2px] border-white/10 bg-white/20 p-1 font-mono text-sm hover:border-[#1E88E5]/40 sm:mx-4 sm:p-3 sm:text-base",
+        className
+      )}
       onMouseEnter={() => setShowCopy(true)}
       onMouseLeave={() => setShowCopy(false)}
       onClick={handleCopyClick}
@@ -242,7 +300,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
           <div className="mr-2 inline-block h-[0.9em]">
             {getMessageIcon(message)}
           </div>
-          <span className="mr-2 font-bold">{getMessagePrefix(message)}</span>
+          <span className="mr-2 font-bold">{getMessagePrefix(message, t)}</span>
         </>
       )}
 
@@ -268,7 +326,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
       <div className="relative">
         {copied ? (
           <span className="absolute bottom-0 right-0 rounded-full border-2 border-white/30 bg-zinc-800 p-1 px-2 text-gray-300">
-            Copied!
+            {t("Copied!")}
           </span>
         ) : (
           <span
@@ -286,13 +344,14 @@ const ChatMessage = ({ message }: { message: Message }) => {
 
 const DonationMessage = () => {
   const router = useRouter();
+  const [t] = useTranslation();
 
   return (
     <div className="mx-2 my-1 flex flex-col gap-2 rounded-lg border-[2px] border-white/10 bg-blue-500/20 p-1 text-center font-mono hover:border-[#1E88E5]/40 sm:mx-4 sm:p-3 sm:text-base md:flex-row">
       <div className="max-w-none flex-grow">
-        💝️ Help support the advancement of AgentGPT. 💝
+        {`💝️ ${t("HELP_SUPPORT_THE_ADVANCEMENT_OF_AGENTGPT")} 💝️`}
         <br />
-        Please consider sponsoring the project on GitHub.
+        {t("Please consider sponsoring the project on GitHub.")}
       </div>
       <div className="flex items-center justify-center">
         <Button
@@ -301,7 +360,7 @@ const DonationMessage = () => {
             void router.push("https://github.com/sponsors/reworkd-admin")
           }
         >
-          Support now 🚀
+          {`${t("SUPPORT_NOW")} 🚀`}
         </Button>
       </div>
     </div>
@@ -321,16 +380,16 @@ const getMessageIcon = (message: Message) => {
   }
 };
 
-const getMessagePrefix = (message: Message) => {
+const getMessagePrefix = (message: Message, t: Translation) => {
   switch (message.type) {
     case "goal":
-      return "Embarking on a new goal:";
+      return t("Embarking on a new goal:");
     case "task":
-      return "Added task:";
+      return t("Added task:");
     case "thinking":
-      return "Thinking...";
+      return t("Thinking...");
     case "action":
-      return message.info ? message.info : "Executing:";
+      return message.info ? message.info : t("Executing:");
   }
 };
 
