@@ -9,27 +9,27 @@ export function HelpDialog(props: HelpDialogProps) {
   const { show, close } = props;
   return (
     <Dialog
-      header={t("Welcome to AgentGPT 🤖")}
+      header={t("WELCOME_TO_AGENT_GPT", { ns: "help" })}
       isShown={show}
       close={close}
     >
       <div className="text-md relative flex-auto p-2 leading-relaxed">
         <p>
-          <strong>AgentGPT</strong> {t(`allows you to configure and deploy
-          Autonomous AI agents. Name your custom AI and have it embark on any
-          goal imaginable. It will attempt to reach the goal by thinking of
-          tasks to do, executing them, and learning from the results 🚀`)}
+          <strong>AgentGPT</strong> {t("INTRODUCING_AGENTGPT", { ns: "help" })}
         </p>
         <div>
           <br />
-          This platform is currently in beta, we are currently working on:
-          <ul className="ml-5 list-inside list-disc">
-            <li>{t("Long term memory 🧠")}</li>
-            <li>{t("Web browsing 🌐")}</li>
-            <li>{t("Interaction with websites and people 👨‍👩‍👦")}</li>
-          </ul>
+          {t("TO_LEARN_MORE_ABOUT_AGENTGPT", {
+            ns: "help",
+          })}
+          <a
+            href="https://reworkd.github.io/AgentGPT-Documentation/docs/intro"
+            className="text-sky-500"
+          >
+            {t("AGENTGPT_DOCUMENTATION", { ns: "help" })}
+          </a>
           <br />
-          <p className="mt-2">{t("Follow the journey below:")}</p>
+          <p className="mt-2">{t("FOLLOW_THE_JOURNEY", { ns: "help" })}</p>
         </div>
         <div className="mt-4 flex w-full items-center justify-center gap-5">
           <div

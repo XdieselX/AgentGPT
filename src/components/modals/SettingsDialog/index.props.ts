@@ -1,7 +1,7 @@
-import { ModelSettings } from "../../types";
+import { ModelSettings, SettingModel } from "../../types";
 
 export interface SettingsDialogProps {
   show: boolean;
   close: () => void;
-  customSettings: [ModelSettings, (settings: ModelSettings) => void]
+  customSettings: SettingModel
 }

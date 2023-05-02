@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { WindowButton } from "../..";
+import { MESSAGE_TYPE_GOAL, MESSAGE_TYPE_TASK, WindowButton } from "../..";
 import { FaSave } from "react-icons/fa";
 import { pdf } from "@react-pdf/renderer";
 import type { Message } from "../..";
@@ -9,10 +9,11 @@ import { PDFButtonProps } from "./index.props";
 
 const IPDFButton = (props: PDFButtonProps) => {
   const { messages, name } = props;
-  const content = getContent(messages);
+
+  const textSections = getTextSections(messages);
 
   const downloadPDF = async () => {
-    const blob = await pdf(<MyDocument content={content} />).toBlob();
+    const blob = await pdf(<MyDocument textSections={textSections} />).toBlob();
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -29,26 +30,33 @@ const IPDFButton = (props: PDFButtonProps) => {
           downloadPDF().catch(console.error);
         }}
         icon={<FaSave size={12} />}
-        name={"Save as PDF"}
+        name={name}
       />
     </>
   );
 };
 
-const getContent = (messages: Message[]): string => {
+const getTextSections = (messages: Message[]): string[] => {
   const [t] = useTranslation();
+
   // Note "Thinking" messages have no `value` so they show up as new lines
   return messages
     .map((message) => {
-      if (message.type == "goal") {
-        return `${t("Goal: ")}${message.value}`;
+      if (message.type == MESSAGE_TYPE_GOAL) {
+        return `${t("AGENT_GOAL", { ns: "indexPage" })}: ${message.value}`;
       }
-      if (message.type == "task") {
-        return `${t("Adding Task: ")}${message.value}`;
+      if (message.type == MESSAGE_TYPE_TASK) {
+        if (message.info) {
+          return `${t("EXECUTING", { ns: "common" })} "${message.value}": ${
+            message.info
+          }`;
+        } else {
+          return `${t("ADDING_TASK", { ns: "common" })}: ${message.value}`;
+        }
       }
       return message.value;
     })
-    .join("\n");
+    .filter((message) => message !== "");
 };
 
 const PDFButton = memo(IPDFButton);

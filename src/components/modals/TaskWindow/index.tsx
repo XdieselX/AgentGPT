@@ -1,17 +1,23 @@
 import React from "react";
-import { FaListAlt } from "react-icons/fa";
-import {
-  FadeIn,
-  Expand
-} from "../..";
-import { useTranslation } from "react-i18next";
 import {
   TaskProps,
   TaskWindowProps
 } from "./index.props";
+import {
+  FadeIn,
+  Expand,
+  Task,
+  useMessageStore,
+  useAgentStore,
+  getMessageContainerStyle,
+  getTaskStatusIcon
+} from "../..";
+import { FaListAlt } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
-export const TaskWindow = (props: TaskWindowProps) => {
-  const { tasks } = props;
+export const TaskWindow = () => {
+  const tasks = useMessageStore.use.tasks();
   const [t] = useTranslation();
   return (
     <Expand className="xl mx-2 mt-4 hidden w-[20rem] flex-col items-center rounded-2xl border-2 border-white/20 bg-zinc-900 px-1 font-mono shadow-2xl xl:flex">
@@ -31,10 +37,18 @@ export const TaskWindow = (props: TaskWindowProps) => {
 
 const Task = (props: TaskProps) => {
   const { task } = props;
+  const isAgentStopped = useAgentStore.use.isAgentStopped();
   return (
-    <FadeIn delay={1}>
-      <div className="w-full rounded-md border-2 border-white/20 p-2 text-sm text-white hover:border-white/40">
-        {task.value}//TODO - add the other properties
+    <FadeIn>
+      <div
+        className={clsx(
+          "w-full animate-[rotate] rounded-md border-2 p-2 text-xs text-white",
+          isAgentStopped && "opacity-50",
+          getMessageContainerStyle(task)
+        )}
+      >
+        {getTaskStatusIcon(task, { isAgentStopped })}
+        <span>{task.value}</span>//TODO - add the other properties
       </div>
     </FadeIn>
   );

@@ -1,7 +1,10 @@
-import { type NextPage } from "next";
+import { type NextPage, type GetStaticProps } from "next";
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
+import { languages } from "../../utils/languages";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import nextI18NextConfig from "../../../next-i18next.config";
 import { FaTrash, FaShare, FaBackspace } from "react-icons/fa";
 
 import DefaultLayout from "../../layout/default";
@@ -43,7 +46,7 @@ const AgentPage: NextPage = () => {
       centered
     >
       <ChatWindow
-        messages={messages}
+        messages={messages.filter((m) => m.type !== "thinking")}
         title={getAgent?.data?.name}
         showDonation={false}
         className="min-h-[80vh] md:w-[80%]"
@@ -76,7 +79,7 @@ const AgentPage: NextPage = () => {
       </div>
       <Toast
         model={[showCopied, setShowCopied]}
-        title={t("Copied to clipboard! 🚀")}
+        title={`${t("COPIED_TO_CLIPBOARD", { ns: "common" })}`}
         className="bg-gray-950 text-sm"
       />
     </DefaultLayout>
@@ -84,3 +87,14 @@ const AgentPage: NextPage = () => {
 };
 
 export default AgentPage;
+
+export const getStaticProps: GetStaticProps = async ({ locale = "en" }) => {
+  const supportedLocales = languages.map((language) => language.code);
+  const chosenLocale = supportedLocales.includes(locale) ? locale : "en";
+
+  return {
+    props: {
+      ...(await serverSideTranslations(chosenLocale, nextI18NextConfig.ns)),
+    },
+  };
+};

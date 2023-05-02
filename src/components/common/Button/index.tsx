@@ -1,6 +1,6 @@
 import type { ForwardedRef } from "react";
 import React, { forwardRef, useState } from "react";
-import { Loader } from "..";
+import { Loader, Ping } from "..";
 import clsx from "clsx";
 import { ButtonProps } from "./index.props";
 
@@ -23,7 +23,7 @@ const Button = forwardRef(
         type={props.type}
         disabled={loading || props.disabled}
         className={clsx(
-          "text-gray/50 rounded-lg border-[2px] border-white/30 px-5 py-2 font-bold transition-all sm:px-10 sm:py-3",
+          "text-gray/50 relative rounded-lg border-[2px] border-white/30 px-5 py-2 font-bold transition-all sm:px-10 sm:py-3",
           props.disabled &&
             "cursor-not-allowed border-white/10 bg-zinc-900 text-white/30",
           props.disabled ||
@@ -33,6 +33,7 @@ const Button = forwardRef(
         )}
         onClick={onClick}
       >
+        {props.ping ? <Ping color="white" /> : <></>}
         <div className="flex items-center justify-center">
           {loading ? (
             <Loader />

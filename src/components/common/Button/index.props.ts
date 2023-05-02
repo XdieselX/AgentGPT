@@ -5,6 +5,7 @@ export interface ButtonProps {
   children?: React.ReactNode;
   loader?: boolean;
   disabled?: boolean;
+  ping?: boolean;
   enabledClassName?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
 }

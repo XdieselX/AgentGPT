@@ -1,8 +1,21 @@
-import type { ModelSettings } from "../components";
 import { OpenAIApi } from "openai";
 import { Config } from "../hooks/useConfig";
+import type { ModelSettings } from "../components";
+import type { Analysis } from "../services/agent-service";
 
 export interface RequestBody {
+  modelSettings: ModelSettings;
+  goal: string;
+  language: string;
+  task?: string;
+  tasks?: string[];
+  lastTask?: string;
+  result?: string;
+  completedTasks?: string[];
+  analysis?: Analysis;
+}
+
+/*export interface RequestBody {
   modelSettings: ModelSettings;
   goal: string;
   task?: string;//Task
@@ -10,7 +23,7 @@ export interface RequestBody {
   lastTask?: string;
   result?: string;
   completedTasks?: string[];
-}
+}*/
 
 export interface Plugin {
   ID(): string;

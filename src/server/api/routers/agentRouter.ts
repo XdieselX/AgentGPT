@@ -6,12 +6,12 @@ import {
   publicProcedure,
 } from "../trpc";
 import { prisma } from "../../db";
-import { messageParser } from "../../../components";
+import { messageSchema, MESSAGE_TYPE_TASK } from "../../../components";
 
 const saveAgentParser = z.object({
   name: z.string(),
   goal: z.string(),
-  tasks: z.array(messageParser)
+  tasks: z.array(messageSchema)
 });
 
 export const agentRouter = createTRPCRouter({
@@ -31,6 +31,9 @@ export const agentRouter = createTRPCRouter({
           data: {
             agentId: agent.id,
             type: e.type,
+            ...(e.type === MESSAGE_TYPE_TASK && {
+              status: e.status,
+            }) as any,
             info: e.info,
             value: e.value,
             sort: i,

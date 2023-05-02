@@ -1,5 +1,6 @@
 export interface WindowButtonProps {
-  delay: number;
+  ping?: boolean; //Toggles the ping animation
+  delay?: number;
   onClick?: () => void;
   icon: React.ReactNode;
   name: string;

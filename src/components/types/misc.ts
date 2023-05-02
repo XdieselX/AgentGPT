@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next";
+import { Task } from "./agent";
 
 export type ModelSettings = {
   customApiKey?: string;
@@ -6,6 +7,12 @@ export type ModelSettings = {
   customTemperature?: number;
   customMaxLoops?: number;
   maxTokens?: number;
+};
+
+export type SettingModel = {
+  settings: ModelSettings;
+  saveSettings: (settings: ModelSettings) => void;
+  resetSettings: () => void;
 };
 
 export type Goal = {
@@ -18,7 +25,7 @@ export type Goal = {
   completedOn: string;
 }
 
-export type Task = {
+/*export type Task = {
   id: number;
   name: string;
   description: string;
@@ -29,7 +36,7 @@ export type Task = {
   createdBy: string;
   createdOn: string;
 }
-
+*/
 export type Action = {
   id: number;
   name: string;

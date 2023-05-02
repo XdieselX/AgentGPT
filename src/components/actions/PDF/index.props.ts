@@ -1,10 +1,10 @@
 import type { Message } from "../..";
 
 export interface MyDocumentProps {
-  content: string;
+  textSections: string[];
 }
 
 export interface PDFButtonProps {
   messages: Message[];
-  name?: string;
+  name: string;
 }

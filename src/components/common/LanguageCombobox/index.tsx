@@ -15,8 +15,10 @@ export const LanguageCombobox = () => {
 
   const handleInputChange = (languageName: string) => {
     const selectedLanguage = findLanguage(languageName);
-    setActualLanguage(selectedLanguage);
-    handleLanguageChange(selectedLanguage.code);
+    i18n.changeLanguage(selectedLanguage.code).then(() => {
+      setActualLanguage(selectedLanguage);
+      handleLanguageChange(selectedLanguage.code);
+    });
   };
 
   const handleLanguageChange = (value: string) => {
@@ -33,21 +35,27 @@ export const LanguageCombobox = () => {
       left={
         <>
           <FaGlobe />
-          <span className="ml-2">Lang:</span>
+          <span className="ml-2">{`${i18n.t("LANG", "LANG", {
+            ns: "settings",
+          })}`}</span>
         </>
       }
       type="combobox"
-      value={actualLanguage.name}
+      value={`${actualLanguage.flag} ${actualLanguage.name}`}
       onChange={(e) => handleInputChange(e.target.value)}
       setValue={(e) => handleInputChange(e)}
-      attributes={{ options: languages.map((lang) => lang.name) }}
+      attributes={{
+        options: languages.map((lang) => `${lang.flag} ${lang.name}`),
+      }}
     />
   );
 };
 
 const findLanguage = (nameOrLocale: string): Language => {
   const selectedLanguage = languages.find(
-    (lang) => lang.code === nameOrLocale || lang.name === nameOrLocale
+    (lang) =>
+      lang.code === nameOrLocale ||
+      lang.name === nameOrLocale.substring(4).trim()
   );
   return selectedLanguage || ENGLISH;
 };

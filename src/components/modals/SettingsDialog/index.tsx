@@ -5,7 +5,8 @@ import {
   FaExclamationCircle,
   FaThermometerFull,
   FaSyncAlt,
-  FaCoins
+  FaCoins,
+  FaTachometerAlt
 } from "react-icons/fa";
 import {
   Accordion,
@@ -14,7 +15,11 @@ import {
   Dropdown,
   Input,
   ModelSettings,
-  LanguageCombobox
+  useAgentStore,
+  SettingModel,
+  LanguageCombobox,
+  AUTOMATIC_MODE,
+  PAUSE_MODE
 } from "../..";
 import {
   GPT_4,
@@ -30,22 +35,27 @@ import clsx from "clsx";
 import { SettingsDialogProps } from "./index.props";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import { useTranslation } from "next-i18next";
 
 export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
 
   const {
     show,
     close,
-    customSettings: [customSettings, setCustomSettings],
+    customSettings,
   } = props;
 
   const [settings, setSettings] = React.useState<ModelSettings>({
-    ...customSettings
+    ...customSettings.settings,
   });
-  const t = useTypeSafeTranslation();
+  const [t] = useTranslation();
+  const agent = useAgentStore.use.agent();
+  const agentMode = useAgentStore.use.agentMode();
+  const updateAgentMode = useAgentStore.use.updateAgentMode();
+
 
   useEffect(() => {
-    setSettings(customSettings);
+    setSettings(customSettings.settings);
   }, [customSettings, close]);
 
   const updateSettings = <Key extends keyof ModelSettings>(
@@ -60,13 +70,13 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
   const handleSave = () => {
     if (!isValidKey(settings.customApiKey)) {
       confirmAlert({
-        title: t('Invalid API key'),
-        message: t("Are you sure you want to continue? If yes, the api key will be emptied."),
+        title: t('Invalid API key') ?? "",
+        message: t("Are you sure you want to continue? If yes, the api key will be emptied.") ?? "",
         buttons: [
           {
             label: t('Yes'),
             onClick: () => {
-              setCustomSettings(settings);
+              customSettings.saveSettings(settings);
               close();
             }
           },
@@ -78,9 +88,14 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
       });
       return;
     }
-    setCustomSettings(settings);
+    customSettings.saveSettings(settings);
     close();
     return;
+  };
+
+  const handleReset = () => {
+    customSettings.resetSettings();
+    close();
   };
 
   const disabled = !settings.customApiKey;
@@ -91,14 +106,20 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
         left={
           <>
             <FaThermometerFull />
-            <span className="ml-2">Temperature: </span>
+            <span className="ml-2">
+              {`${t("TEMPERATURE", { ns: "settings" })}`}
+            </span>
           </>
         }
         value={settings.customTemperature}
-        onChange={(e) => updateSettings("customTemperature", parseFloat(e.target.value))}
+        onChange={(e) =>
+          updateSettings("customTemperature", parseFloat(e.target.value))
+        }
         type="range"
         toolTipProperties={{
-          message: t("Higher temperature will make output more random, while lower temperature will make output more focused and deterministic."),
+          message: `${t("HIGHER_VALUES_MAKE_OUTPUT_MORE_RANDOM", {
+            ns: "settings",
+          })}`,
           disabled: false,
         }}
         attributes={{
@@ -107,21 +128,23 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
           step: 0.01,
         }}
       />
-      <br />
       <Input
         left={
           <>
             <FaSyncAlt />
-            <span className="ml-2">Loop #: </span>
+            <span className="ml-2">{`${t("LOOP", { ns: "settings" })}`}</span>
           </>
         }
         value={settings.customMaxLoops}
         disabled={disabled}
-        onChange={(e) => updateSettings("customMaxLoops", parseFloat(e.target.value))}
+        onChange={(e) =>
+          updateSettings("customMaxLoops", parseFloat(e.target.value))
+        }
         type="range"
         toolTipProperties={{
-          message:
-            t("Controls the maximum number of loops that the agent will run (higher value will make more API calls)."),
+          message: `${t("CONTROL_THE_MAXIMUM_NUM_OF_LOOPS", {
+            ns: "settings",
+          })}`,
           disabled: false,
         }}
         attributes={{
@@ -130,27 +153,29 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
           step: 1,
         }}
       />
-      <br />
       <Input
         left={
           <>
             <FaCoins />
-            <span className="ml-2">Max Tokens: </span>
+            <span className="ml-2">{`${t("TOKENS", { ns: "settings" })}`}</span>
           </>
         }
-        value={settings.maxTokens ?? 750}
-        onChange={(e) => updateSettings("maxTokens", parseFloat(e.target.value))}
-        type="range"
+        value={settings.maxTokens ?? 400}
         disabled={disabled}
+        onChange={(e) =>
+          updateSettings("maxTokens", parseFloat(e.target.value))
+        }
+        type="range"
         toolTipProperties={{
-          message:
-            "Controls the maximum number of tokens that the agent will generate (higher value will make more API calls).",
+          message: `${t("CONTROL_MAXIMUM_OF_TOKENS_DESCRIPTION", {
+            ns: "settings",
+          })}`,
           disabled: false,
         }}
         attributes={{
-          min: 250,
-          max: 1500,
-          step: 10,
+          min: 200,
+          max: 2000,
+          step: 100,
         }}
       />
     </div>
@@ -158,65 +183,113 @@ export const SettingsDialog : React.FC<SettingsDialogProps> = (props) => {
 
   return (
     <Dialog
-      header={t("Settings ⚙")}
+      header={`${t("SETTINGS_DIALOG_HEADER", {
+        ns: "settings",
+      })}`}
       isShown={show}
       close={close}
-      footerButton={<Button onClick={handleSave}>Save</Button>}
+      footerButton={
+        <>
+          <Button className="bg-red-400 hover:bg-red-500" onClick={handleReset}>
+            {`${t("RESET", {
+              ns: "common",
+            })}`}
+          </Button>
+          <Button onClick={handleSave}>{`${t("SAVE", {
+            ns: "common",
+          })}`}</Button>
+        </>
+      }
       contentClassName="text-md relative flex flex-col gap-2 p-2 leading-relaxed"
     >
       <p>
-        {t(`Here you can add your OpenAI API key. This will require you to pay for
-        your own OpenAI usage but give you greater access to AgentGPT! You can
-        additionally select any model OpenAI offers.`)}
+        Get your own OpenAI API key{" "}
+        <a className="link" href="https://platform.openai.com/account/api-keys">
+          here
+        </a>
+        . Ensure you have free credits available on your account, otherwise you{" "}
+        <a
+          className="link"
+          href="https://platform.openai.com/account/billing/overview"
+        >
+          must connect a credit card
+        </a>
+        .
       </p>
-      <p
-        className={clsx(
-          "my-2",
-          settings.customModelName === GPT_4 &&
+      {settings.customModelName === GPT_4 && (
+        <p
+          className={clsx(
+            "my-2",
             "rounded-md border-[2px] border-white/10 bg-yellow-300 text-black"
-        )}
-      >
-        <FaExclamationCircle className="inline-block" />
-        &nbsp;
-        <b>
-          {t(`To use the GPT-4 model, you need to also provide the API key for
-          GPT-4. You can request for it`)}
+          )}
+        >
+          <FaExclamationCircle className="inline-block" />
           &nbsp;
-          <a
-            href="https://openai.com/waitlist/gpt-4-api"
-            className="text-blue-500"
-          >
-            {t("here")}
-          </a>
-          .&nbsp; {t(("ChatGPT Plus subscription will not work"))}
-        </b>
-      </p>
-      <br />
+          <b>
+            {`${t("INFO_TO_USE_GPT4", { ns: "settings" })}`}
+            &nbsp;
+            <a
+              href="https://openai.com/waitlist/gpt-4-api"
+              className="text-blue-500"
+            >
+              {`${t("HERE", "HERE", { ns: "settings" })}`}
+            </a>
+            .&nbsp;{" "}
+            {`${t("SUBSCRIPTION_WILL_NOT_WORK", {
+              ns: "settings",
+            })}`}
+          </b>
+        </p>
+      )}
       <div className="text-md relative flex-auto p-2 leading-relaxed">
         <Input
           left={
             <>
+              <FaKey />
+              <span className="ml-2">{`${t("API_KEY", {
+                ns: "settings",
+              })}`}</span>
+            </>
+          }
+          placeholder={"sk-..."}
+          type="password"
+          value={settings.customApiKey}
+          onChange={(e) => updateSettings("customApiKey", e.target.value)}
+        />
+        <LanguageCombobox />
+        <Input
+          left={
+            <>
               <FaMicrochip />
-              <span className="ml-2">Model:</span>
+              <span className="ml-2">{`${t("LABEL_MODEL", {
+                ns: "settings",
+              })}`}</span>
             </>
           }
           type="combobox"
           value={settings.customModelName}
           onChange={() => null}
           setValue={(e) => updateSettings("customModelName", e)}
-          attributes={{options : GPT_MODEL_NAMES}}
+          attributes={{ options: GPT_MODEL_NAMES }}
+          disabled={disabled}
         />
-        <LanguageCombobox />
         <Input
           left={
             <>
-              <FaKey />
-              <span className="ml-2">Key: </span>
+              <FaTachometerAlt />
+              <span className="ml-2">Mode: </span>
             </>
           }
-          placeholder={"sk-..."}
-          value={settings.customApiKey}
-          onChange={(e) => updateSettings("customApiKey", e.target.value)}
+          value={agentMode}
+          disabled={agent !== null}
+          onChange={() => null}
+          setValue={updateAgentMode as (agentMode: string) => void}
+          type="combobox"
+          toolTipProperties={{
+            message: `${AUTOMATIC_MODE} (Default): Agent automatically executes every task. \n\n${PAUSE_MODE}: Agent pauses after every set of task(s)`,
+            disabled: false,
+          }}
+          attributes={{ options: [AUTOMATIC_MODE, PAUSE_MODE] }}
         />
         <br className="md:inline" />
           <Accordion

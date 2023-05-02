@@ -44,7 +44,7 @@ export function Dialog(props: DialogProps) {
           </div>
           {/*body*/}
           <div className={clsx(
-              "text-md relative max-h-[50vh] flex-auto overflow-y-auto p-3 leading-relaxed",
+              "text-md relative max-h-[50vh] flex-auto overflow-y-auto p-5 leading-relaxed md:p-7",
               contentClassName
             )}
           >
@@ -56,7 +56,7 @@ export function Dialog(props: DialogProps) {
               enabledClassName="bg-yellow-600 hover:bg-yellow-500"
               onClick={close}
             >
-              {t('Close')}
+              {`${t("CLOSE", { ns: "common" })}`}
             </Button>
             {footerButton}
           </div>

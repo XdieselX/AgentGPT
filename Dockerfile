@@ -16,18 +16,11 @@ RUN npm ci
 
 # Copy the rest of the application code
 COPY . .
-RUN mv .env.docker .env  \
-    && sed -ie 's/postgresql/sqlite/g' prisma/schema.prisma \
-    && sed -ie 's/mysql/sqlite/g' prisma/schema.prisma \
-   && sed -ie 's/@db.Text//' prisma/schema.prisma
 
 # Expose the port the app will run on
 EXPOSE 3000
 
-# Add Prisma and generate Prisma client
-RUN npx prisma generate  \
-    && npx prisma migrate dev --name init  \
-    && npx prisma db push
+ENTRYPOINT [ "sh", "entrypoint.sh" ]
 
 # Build the Next.js app
 RUN npm run build

@@ -2,7 +2,6 @@ import type { GetServerSidePropsContext } from "next";
 import {
   getServerSession,
   type NextAuthOptions,
-  type DefaultSession,
 } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -14,27 +13,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./db";
 import { serverEnv } from "../env/schema.mjs";
 import { sendVerificationRequest, sendWelcomeEmail } from "./nodemailer";
-
-/**
- * Module augmentation for `next-auth` types
- * Allows us to add custom properties to the `session` object
- * and keep type safety
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- **/
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-    } & DefaultSession["user"] & User
-      // ...other properties
-      // role: UserRole;
-  }
-
-  interface User {
-    role?: string;
-    subscriptionId: string | undefined;
-  }
-}
 
 const providers = [
   GoogleProvider({

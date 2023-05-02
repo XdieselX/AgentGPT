@@ -5,6 +5,7 @@ import {
   FaCog,
   FaDiscord,
   FaGithub,
+  FaHeart,
   FaQuestionCircle,
   FaRobot,
   FaRocket,
@@ -20,6 +21,7 @@ import { env } from "../../../env/client.mjs";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { api } from "../../../utils";
+import { FadingHr } from "../.."
 import { AuthItemProps, DrawerItemProps, DrawerProps, ProItemProps } from "./index.props";
 
 export const Drawer = (props: DrawerProps) => {
@@ -33,7 +35,7 @@ export const Drawer = (props: DrawerProps) => {
     // Function to check if the screen width is for desktop or tablet
     const checkScreenWidth = () => {
       const screenWidth = window.innerWidth;
-      if (screenWidth >= 768) {
+      if (screenWidth >= 850) {
         // 768px is the breakpoint for tablet devices
         setShowDrawer(true);
       } else {
@@ -77,6 +79,11 @@ export const Drawer = (props: DrawerProps) => {
     setShowDrawer((prevState) => !prevState);
   };
 
+  const handleSupport = () => {
+    const donationUrl = "";
+    window.open(donationUrl, "_blank");
+  }
+
   console.log(env.NEXT_PUBLIC_FF_AUTH_ENABLED)
 
   return (
@@ -91,11 +98,13 @@ export const Drawer = (props: DrawerProps) => {
       >
         <div className="flex flex-col gap-1 overflow-hidden">
           <div className="mb-2 flex justify-center gap-2">
-            My Agent(s)
+            <p className="font-bold">{`${t("MY_AGENTS", { ns: "drawer" })}`}</p>
             <button
               className={clsx(
-                showDrawer ? "-translate-x-2" : "translate-x-12",
-                "absolute right-0 top-2 z-40 rounded-md border-2 border-white/20 bg-zinc-900 p-2  text-white transition-all hover:bg-zinc-700 "
+                showDrawer
+                  ? "-translate-x-2"
+                  : "translate-x-12 border-2 border-white/20",
+                "absolute right-0 top-2 z-40 rounded-md bg-zinc-900 p-2 text-white transition-all hover:bg-zinc-700 "
               )}
               onClick={toggleDrawer}
             >
@@ -117,23 +126,29 @@ export const Drawer = (props: DrawerProps) => {
             )}
             {status === "unauthenticated" && (
               <div>
-                {t(
-                  "Sign in to be able to save agents and manage your account!"
-                )}
+                <a
+                  className="link"
+                  onClick={() => {
+                    signIn();
+                  }}
+                >
+                  {`${t("SIGN_IN", { ns: "drawer" })}`}
+                </a>{" "}
+                {`${t("SIGN_IN_NOTICE", { ns: "drawer" })}`}
               </div>
             )}
             {status === "authenticated" && userAgents.length === 0 && (
               <div>
-                {t(
-                  "You need to create and save your first agent before anything shows up here!"
-                )}
+                {`${t("NEED_TO_SIGN_IN_AND_CREATE_AGENT_FIRST", {
+                  ns: "drawer",
+                })}`}
               </div>
             )}
           </ul>
         </div>
 
         <div className="flex flex-col gap-1">
-          <hr className="my-2 border-gray-600/10" />
+          <FadingHr className="my-2" />
           {env.NEXT_PUBLIC_FF_SUB_ENABLED ||
             (router.query.pro && (
               <ProItem
@@ -154,28 +169,54 @@ export const Drawer = (props: DrawerProps) => {
           />
           <DrawerItem icon={<FaCog />} text="Settings" onClick={showSettings} />
           <DrawerItem
-            icon={<FaDiscord size={30}/>}
-            text="Discord"
-            //href="https://discord.gg/jdSBAnmdnY"
-            href=""
-            target="_blank"
-            small
+            icon={<FaHeart />}
+            text={`${t("SUPPORT_BUTTON", { ns: "drawer" })}`}
+            onClick={handleSupport}
           />
-          <hr className="my-2 border-white/20" />
-          <div>
+          <DrawerItem
+            icon={
+              <FaCog className="transition-transform group-hover:rotate-90" />
+            }
+            text={`${t("SETTINGS_BUTTON", {
+              ns: "drawer",
+            })}`}
+            onClick={showSettings}
+          />
+          <FadingHr className="my-2" />
+          <div className="flex flex-row items-center">
             <DrawerItem
-              icon={<FaTwitter size={30} />}
-              text="Twitter"
-              //href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
-              href=""
+              icon={
+                <FaDiscord
+                  size={30}
+                  className="transition-colors group-hover:fill-current group-hover:text-indigo-400"
+                />
+              }
+              text="Discord"
+              href="https://discord.gg/jdSBAnmdnY"
               target="_blank"
               small
             />
             <DrawerItem
-              icon={<FaGithub size={30}/>}
+              icon={
+                <FaTwitter
+                  size={30}
+                  className="transition-colors group-hover:fill-current group-hover:text-sky-500"
+                />
+              }
+              text="Twitter"
+              href="https://twitter.com/asimdotshrestha/status/1644883727707959296"
+              target="_blank"
+              small
+            />
+            <DrawerItem
+              icon={
+                <FaGithub
+                  size={30}
+                  className="transition-colors group-hover:fill-current group-hover:text-purple-500"
+                />
+              }
               text="GitHub"
-              //href="https://github.com/reworkd/AgentGPT"
-              href=""
+              href="https://github.com/reworkd/AgentGPT"
               target="_blank"
               small
             />
@@ -193,7 +234,7 @@ const DrawerItem = (props: DrawerItemProps) => {
     return (
       <a
         className={clsx(
-          "flex cursor-pointer flex-row items-center rounded-md p-2 hover:bg-white/5",
+          "group flex cursor-pointer flex-row items-center rounded-md p-2 hover:bg-white/5",
           border && "border-[1px] border-white/20",
           `${className || ""}`
         )}
@@ -210,7 +251,7 @@ const DrawerItem = (props: DrawerItemProps) => {
     <button
       type="button"
       className={clsx(
-        "flex cursor-pointer flex-row items-center rounded-md p-2 hover:bg-white/5",
+        "group flex cursor-pointer flex-row items-center rounded-md p-2 hover:bg-white/5",
         border && "border-[1px] border-white/20",
         `${className || ""}`
       )}
@@ -226,8 +267,10 @@ const DrawerItem = (props: DrawerItemProps) => {
 const AuthItem: React.FC<AuthItemProps> = (props) => {
   const { signIn, signOut, session } = props;
   const [t] = useTranslation();
-  const icon = session?.user ? <FaSignInAlt /> : <FaSignOutAlt />;
-  const text = session?.user ? t("Sign Out") : t("Sign In");
+  const icon = session?.user ? <FaSignOutAlt /> : <FaSignInAlt />;
+  const text = session?.user
+    ? `${t("SIGN_IN", { ns: "drawer" })}`
+    : `${t("SIGN_OUT", { ns: "drawer" })}`;
   const onClick = session?.user ? signOut : signIn;
 
   return <DrawerItem icon={icon} text={text} onClick={onClick} />;
@@ -236,7 +279,9 @@ const AuthItem: React.FC<AuthItemProps> = (props) => {
 const ProItem: React.FC<ProItemProps> = (props) => {
   const { sub, manage, session } = props;
   const [t] = useTranslation();
-  const text = session?.user?.subscriptionId ? t("Account") : t("Go Pro");
+  const text = session?.user?.subscriptionId
+    ? `${t("ACCOUNT", { ns: "drawer" })}`
+    : `${t("GO_PRO", { ns: "drawer" })}`;
   let icon = session?.user ? <FaUser /> : <FaRocket />;
   if (session?.user?.image) {
     icon = (

@@ -1,5 +1,12 @@
 import React from "react";
-import { Document, Page, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import ReactPDF, {
+  Document,
+  Page,
+  Text,
+  StyleSheet,
+  Font
+} from "@react-pdf/renderer";
+import View = ReactPDF.View;
 import { MyDocumentProps } from "./index.props";
 
 Font.register({
@@ -13,10 +20,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     padding: 40,
   },
+  horizontalRule: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
+    borderBottomStyle: "solid",
+  },
   section: {
     fontSize: 12,
     fontFamily: "Roboto",
-    marginBottom: 20,
+    marginVertical: 10,
     lineHeight: 1.5,
   },
 });
@@ -24,9 +36,16 @@ const styles = StyleSheet.create({
 const MyDocument: React.FC<MyDocumentProps> = (props: MyDocumentProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <Text style={styles.section}>{props.content}</Text>
+      {props.textSections.map((text) => (
+        <>
+          <Text style={styles.section}>{text}</Text>
+          <HorizontalRule />
+        </>
+      ))}
     </Page>
   </Document>
 );
+
+const HorizontalRule: React.FC = () => <View style={styles.horizontalRule} />;
 
 export default MyDocument;
