@@ -3,4 +3,5 @@ export interface LoaderProps {
   size?: number;
   speed?: number;
   lineWeight?: number;
+  color?: string;
 }

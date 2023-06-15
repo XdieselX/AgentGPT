@@ -15,7 +15,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "rootDir": "."
   },
   "include": [
     "next-env.d.ts",
@@ -25,5 +26,5 @@
     "**/*.mjs",
     "**/*.js"
   ],
-  "exclude": ["node_modules", "venv", "./prisma"]
+  "exclude": ["node_modules", "venv"]
 }

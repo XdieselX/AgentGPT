@@ -8,7 +8,7 @@ import clsx from "clsx";
 import {v1} from "uuid"
 import { AnimatePresence } from "framer-motion";
 
-import {
+import type {
   TaskProps,
   TaskWindowProps
 } from "./index.props";

@@ -33,15 +33,13 @@
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-restricted-imports": [
+    "no-restricted-imports": [
       "error",
       {
         "paths": [
           {
             "name": "react-i18next",
-            "importNames": [
-              "useTranslation"
-            ],
+            "importNames": ["useTranslation"],
             "message": "Import useTranslation from next-i18next instead."
           }
         ]

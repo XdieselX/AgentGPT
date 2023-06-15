@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import React, { memo } from "react";
-import { useTranslation } from "react-i18next";
-import { MESSAGE_TYPE_GOAL, MESSAGE_TYPE_TASK, WindowButton } from "../..";
-import { FaSave } from "react-icons/fa";
 import { pdf } from "@react-pdf/renderer";
+import {
+  MESSAGE_TYPE_GOAL,
+  MESSAGE_TYPE_TASK,
+  WindowButton
+} from "../..";
+import { FaFilePdf } from "react-icons/fa";
 import type { Message } from "../..";
 import MyDocument from "./MyDocument";
-import { PDFButtonProps } from "./index.props";
+import type { PDFButtonProps } from "./index.props";
+import { i18n } from "next-i18next";
 
 const IPDFButton = (props: PDFButtonProps) => {
   const { messages, name } = props;
@@ -25,11 +30,10 @@ const IPDFButton = (props: PDFButtonProps) => {
   return (
     <>
       <WindowButton
-        delay={0.2}
         onClick={() => {
           downloadPDF().catch(console.error);
         }}
-        icon={<FaSave size={12} />}
+        icon={<FaFilePdf size={12} />}
         name={name}
       />
     </>
@@ -37,21 +41,17 @@ const IPDFButton = (props: PDFButtonProps) => {
 };
 
 const getTextSections = (messages: Message[]): string[] => {
-  const [t] = useTranslation();
-
   // Note "Thinking" messages have no `value` so they show up as new lines
   return messages
     .map((message) => {
       if (message.type == MESSAGE_TYPE_GOAL) {
-        return `${t("AGENT_GOAL", { ns: "indexPage" })}: ${message.value}`;
+        return `${i18n?.t("LABEL_AGENT_GOAL", { ns: "indexPage" })}: ${message.value}`;
       }
       if (message.type == MESSAGE_TYPE_TASK) {
         if (message.info) {
-          return `${t("EXECUTING", { ns: "common" })} "${message.value}": ${
-            message.info
-          }`;
+          return `${i18n?.t("EXECUTING", { ns: "common" })}: "${message.value}": ${message.info}`;
         } else {
-          return `${t("ADDING_TASK", { ns: "common" })}: ${message.value}`;
+          return `${i18n?.t("ADDING_TASK", { ns: "common" })}: ${message.value}`;
         }
       }
       return message.value;

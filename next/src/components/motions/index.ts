@@ -1,4 +1,4 @@
-export * from './expand'
+export * from './Expand'
 export * from './FadeIn'
 export * from './FadeOut'
-export * from './popin'
+export * from './PopIn'

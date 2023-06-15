@@ -4,5 +4,10 @@ export interface DialogProps {
     isShown: boolean;
     close: () => void;
     footerButton?: React.ReactNode;
-    contentClassName?: string;
+}
+
+export interface DialogBackgroundProps{
+  isShown: boolean;
+  children: React.ReactNode;
+  close: () => void;
 }

@@ -1,6 +1,7 @@
 export * from './Accordion';
 export * from './AppHead';
 export * from './AppTitle';
+export * from './Backing';
 export * from './Badge';
 export * from './BannerBadge';
 export * from './Button';
@@ -9,6 +10,7 @@ export * from './Button';
 //export * from './Chip';
 export * from './ComboBox';
 //export * from './Divider';
+export * from './DrawerItemButton';
 export * from './Dropdown';
 export * from './FadingHr';
 export * from './Input';
