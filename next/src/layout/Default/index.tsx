@@ -3,7 +3,7 @@ import {
   DottedGridBackground
 } from "../../components";
 import clsx from "clsx";
-import { LayoutProps } from "./index.props";
+import type { LayoutProps } from "./index.props";
 
 export const DefaultLayout = (props: LayoutProps) => {
   const description = "Assemble, configure, and deploy autonomous AI Agents in your browser.";

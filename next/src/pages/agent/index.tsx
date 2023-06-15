@@ -2,13 +2,15 @@ import { type NextPage, type GetStaticProps } from "next";
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
-import { languages } from "../../utils/languages";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import nextI18NextConfig from "../../../next-i18next.config";
 import { FaTrash, FaShare, FaBackspace } from "react-icons/fa";
 
+import {
+  languages,
+  api
+} from "../../utils";
+import nextI18NextConfig from "../../../next-i18next.config";
 import DefaultLayout from "../../layout/default";
-import { api } from "../../utils";
 import {
   Button,
   ChatWindow,
@@ -48,9 +50,7 @@ const AgentPage: NextPage = () => {
       <ChatWindow
         messages={messages.filter((m) => m.type !== "thinking")}
         title={getAgent?.data?.name}
-        showDonation={false}
-        className="min-h-[80vh] md:w-[80%]"
-        fullscreen
+        visibleOnMobile
       />
       <div className="flex flex-row gap-2">
         <Button

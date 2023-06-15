@@ -1,88 +1,78 @@
 import { type NextPage, type GetStaticProps } from "next";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { FaRobot, FaStar, FaPlay } from "react-icons/fa";
+import { FaRobot, FaStar, FaPlay, FaCog } from "react-icons/fa";
 import { VscLoading } from "react-icons/vsc";
 import { useSession } from "next-auth/react";
 import DefaultLayout from "../layout/default";
 import type { Message } from "../components";
 import {
-  AgentPlaybackControl,
-  AGENT_PLAY,
-  Badge,
   Button,
   ChatWindow,
-  Drawer,
   Expand,
   Input,
   isTask,
   HelpDialog,
-  PopIn,
-  SettingsDialog,
   TaskWindow,
   useMessageStore,
   useAgentStore,
-  resetAllMessageSlices
+  resetAllMessageSlices,
+  FadeIn,
+  AppTitle,
+  SignInDialog,
+  ToolsDialog
 } from "../components";
 import AutonomousAgent from "../components/AutonomousAgent";
 import {
-  api,
-  GPT_35_TURBO,
-  DEFAULT_MAX_LOOPS_FREE,
   isEmptyOrBlank,
   languages
 } from "../utils";
-import { env } from "../env/client.mjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-//TODO - Make import as single file
-import { useSettings } from "../hooks/useSettings";
-import { useAuth } from "../hooks/useAuth";
-import { useAgent } from "../hooks/useAgent";
+import {
+  useAgent,
+  useSettings,
+  useAuth
+} from "../hooks";
 import nextI18nextConfig from "../../next-i18next.config";
+import { useRouter } from "next/router";
+import { SidebarLayout } from "../layout";
+import { AnimatePresence, motion } from "framer-motion";
+import clsx from "clsx";
 
 const Home: NextPage = () => {
   const { i18n } = useTranslation();
   // zustand states with state dependencies
   const addMessage = useMessageStore.use.addMessage();
   const messages = useMessageStore.use.messages();
-  const tasks = useMessageStore.use.tasks();
   const updateTaskStatus = useMessageStore.use.updateTaskStatus();
+  const { query } = useRouter();
 
   const setAgent = useAgentStore.use.setAgent();
   const isAgentStopped = useAgentStore.use.isAgentStopped();
-  const isAgentPaused = useAgentStore.use.isAgentPaused();
-  const updateIsAgentPaused = useAgentStore.use.updateIsAgentPaused();
   const updateIsAgentStopped = useAgentStore.use.updateIsAgentStopped();
-  const agentMode = useAgentStore.use.agentMode();
-  const agent = useAgentStore.use.agent();
-  const settingsModel = useSettings();
 
+  const agent = useAgentStore.use.agent();
+
+  const fullscreen = agent !== null;
   const { session, status } = useAuth();
 
-  const [name, setName] = React.useState<string>("");
-  const [goalInput, setGoalInput] = React.useState<string>("");
-
-  const [customApiKey, setCustomApiKey] = React.useState<string>("");
-  const [customModelName, setCustomModelName] = React.useState<string>(GPT_35_TURBO);
-  const [customTemperature, setCustomTemperature] = React.useState<number>(0.8);
-  const [customMaxLoops, setCustomMaxLoops] = React.useState<number>(DEFAULT_MAX_LOOPS_FREE);
-  const [maxTokens, setMaxTokens] = React.useState<number>(1000);
-
-  const [shouldAgentStop, setShouldAgentStop] = React.useState(false);
-  //const [tasks, setTasks] = React.useState<string[]>([]);
-
-
+  const nameInput = useAgentStore.use.nameInput();
+  const setNameInput = useAgentStore.use.setNameInput();
+  const goalInput = useAgentStore.use.goalInput();
+  const setGoalInput = useAgentStore.use.setGoalInput();
+  const [mobileVisibleWindow, setMobileVisibleWindow] = React.useState<"Chat" | "Tasks">("Chat");
+  const { settings } = useSettings();
 
   const [showHelpDialog, setShowHelpDialog] = React.useState(false);
-  const [showSettingsDialog, setShowSettingsDialog] = React.useState(false);
+  const [showSignInDialog, setShowSignInDialog] = React.useState(false);
+  const [showToolsDialog, setShowToolsDialog] = React.useState(false);
   const [hasSaved, setHasSaved] = React.useState(false);
   const agentUtils = useAgent();
 
   useEffect(() => {
-    const key = "agentgpt-modal-opened-v0.2";
+    const key = "gptsmart-modal-opened-v0.2";//FIXME - Look out for these keys in on all projects.
     const savedModalData = localStorage.getItem(key);
 
-    // Momentarily always run
     setTimeout(() => {
       if (savedModalData == null) {
         setShowHelpDialog(true);
@@ -101,37 +91,44 @@ const Home: NextPage = () => {
     updateIsAgentStopped();
   }, [agent, updateIsAgentStopped]);
 
-  const handleAddMessage = (message: Message) => {
-    if (isTask(message)) {
-      updateTaskStatus(message);
+
+
+  const setAgentRun = (newName: string, newGoal: string) => {
+    if (agent != null) {
+      return;
     }
 
+    setNameInput(newName);
+    setGoalInput(newGoal);
+    handleNewGoal(newName, newGoal);
+  };
+
+  const handleAddMessage = (message: Message) => {
+    if (isTask(message))
+      updateTaskStatus(message);
     addMessage(message);
   };
 
-  const handlePause = (opts: {
-    agentPlaybackControl?: AgentPlaybackControl;
-  }) => {
-    if (opts.agentPlaybackControl !== undefined) {
-      updateIsAgentPaused(opts.agentPlaybackControl);
+  const disableDeployAgent =
+    agent != null || isEmptyOrBlank(nameInput) || isEmptyOrBlank(goalInput);
+
+  const handleNewGoal = (name: string, goal: string) => {
+    if (name.trim() === "" || goal.trim() === "") {
+      return;
     }
-  };
 
-  const disableDeployAgentButton =
-    agent != null ||
-    name.length == 0 ||
-    isEmptyOrBlank(goalInput);
+    // Do not force login locally for people that don't have auth setup
+    if (session === null) {
+      setShowSignInDialog(true);
+      return;
+    }
 
-  const handleNewGoal = () => {
     const newAgent = new AutonomousAgent(
       name.trim(),
-      goalInput.trim(),
-      i18n.language,
+      goal.trim(),
       handleAddMessage,
-      handlePause,
       () => setAgent(null),
-      settingsModel.settings,
-      agentMode,
+      settings,
       session ?? undefined
     );
     setAgent(newAgent);
@@ -145,23 +142,16 @@ const Home: NextPage = () => {
       return;
     }
 
-    agent.updatePlayBackControl(AGENT_PLAY);
-    updateIsAgentPaused(agent.playbackControl);
     agent.updateIsRunning(true);
     agent.run().then(console.log).catch(console.error);
   };
 
   const handleKeyPress = (
-    e:
-      | React.KeyboardEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLTextAreaElement>
+    e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
-      // Only Enter is pressed, execute the function
-    if (e.key === "Enter" && !disableDeployAgentButton && !e.shiftKey) {
-      if (isAgentPaused) {
-        handleContinue();
-      }
-      handleNewGoal();
+    // Only Enter is pressed, execute the function
+    if (e.key === "Enter" && !disableDeployAgent && !e.shiftKey) {
+      handleNewGoal(nameInput, goalInput);
     }
   };
 
@@ -170,153 +160,168 @@ const Home: NextPage = () => {
     updateIsAgentStopped();
   };
 
-  const proTitle = (
-    <>
-      AgentGPT<span className="ml-1 text-amber-500/90">Pro</span>
-    </>
+  const handleVisibleWindowClick = (visibleWindow: "Chat" | "Tasks") => {
+    // This controls whether the ChatWindow or TaskWindow is visible on mobile
+    setMobileVisibleWindow(visibleWindow);
+  };
+
+  const shouldShowSave =
+    status === "authenticated" && isAgentStopped && messages.length && !hasSaved;
+
+  const firstButton = (
+    <Button
+      ping={!disableDeployAgent}
+      disabled={disableDeployAgent}
+      onClick={() => handleNewGoal(nameInput, goalInput)}
+    >
+      {agent == null ? (
+        i18n.t("BUTTON_DEPLOY_AGENT", { ns: "indexPage" })
+      ) : (
+        <>
+          <VscLoading className="animate-spin" size={20} />
+          <span className="ml-2">{i18n.t("RUNNING", { ns: "common" })}</span>
+        </>
+      )}
+    </Button>
   );
 
-  console.log("auth status: ", status)
-  console.log("session: ", session)
-
-  const shouldShowSave = status === "authenticated" &&
-    isAgentStopped &&
-    messages.length &&
-    !hasSaved;
-
-  const firstButton =
-    isAgentPaused && !isAgentStopped ? (
-      <Button ping disabled={!isAgentPaused} onClick={handleContinue}>
-        <FaPlay size={20} />
-        <span className="ml-2">{i18n.t("Continue")}</span>
-      </Button>
-    ) : (
-      <Button disabled={disableDeployAgentButton} onClick={handleNewGoal}>
-        {agent == null ? (
-          i18n.t("Deploy Agent")
-        ) : (
-          <>
-            <VscLoading className="animate-spin" size={20} />
-            <span className="ml-2">{i18n.t("Running")}</span>
-          </>
-        )}
-      </Button>
-    );
-
   return (
-    <DefaultLayout>
-      <HelpDialog
-        show={showHelpDialog}
-        close={() => setShowHelpDialog(false)}
-      />
-      <SettingsDialog
-        customSettings={settingsModel}
-        show={showSettingsDialog}
-        close={() => setShowSettingsDialog(false)}
-      />
-      <main className="flex min-h-screen flex-row">
-        <Drawer
-          showHelp={() => setShowHelpDialog(true)}
-          showSettings={() => setShowSettingsDialog(true)}
-        />
+    <SidebarLayout>
+      <HelpDialog show={showHelpDialog} close={() => setShowHelpDialog(false)} />
+      <ToolsDialog show={showToolsDialog} close={() => setShowToolsDialog(false)} />
+
+      <SignInDialog show={showSignInDialog} close={() => setShowSignInDialog(false)} />
+      <div id="content" className="flex min-h-screen w-full items-center justify-center">
         <div
-          id="content"
-          className="z-10 flex h-screen w-full items-center justify-center p-2 px-2 sm:px-4 md:px-10"
+          id="layout"
+          className="flex h-screen w-full max-w-screen-xl flex-col items-center gap-1 p-2 sm:gap-3 sm:p-4"
         >
-          <div
-            id="layout"
-            className="flex h-full w-full max-w-screen-xl flex-col items-center justify-between gap-1 py-2 sm:gap-3 sm:py-5 md:justify-center"
-          >
-            <div
-              id="title"
-              className="relative flex flex-col items-center font-mono"
+          {
+            <AnimatePresence>
+              {!fullscreen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "fit-content" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5, type: "easeInOut" }}
+                >
+                  <AppTitle />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          }
+          <div>
+            <Button
+              className={clsx(
+                "rounded-r-none py-0 text-sm sm:py-[0.25em] xl:hidden",
+                mobileVisibleWindow == "Chat" ||
+                  "border-2 border-white/20 bg-gradient-to-t from-sky-500 to-sky-600 hover:bg-gradient-to-t hover:from-sky-400 hover:to-sky-600"
+              )}
+              disabled={mobileVisibleWindow == "Chat"}
+              onClick={() => handleVisibleWindowClick("Chat")}
             >
-              <div className="flex flex-row items-start shadow-2xl">
-                <span className="text-4xl font-bold text-[#C0C0C0] xs:text-5xl sm:text-6xl">
-                  Agent
-                </span>
-                <span className="text-4xl font-bold text-white xs:text-5xl sm:text-6xl">
-                  GPT
-                </span>
-                <PopIn delay={0.5} className="sm:absolute sm:right-0 sm:top-2">
-                  <Badge>Beta 🚀</Badge>
-                </PopIn>
-              </div>
-              <div className="mt-1 text-center font-mono text-[0.7em] font-bold text-white">
-                <p>
-                  {i18n.t("HEADING_DESCRIPTION", {
-                    ns: "indexPage",
-                  })}
-                </p>
-              </div>
-            </div>
+              Chat
+            </Button>
+            <Button
+              className={clsx(
+                "rounded-l-none py-0 text-sm sm:py-[0.25em] xl:hidden",
+                mobileVisibleWindow == "Tasks" ||
+                  "border-2 border-white/20 bg-gradient-to-t from-sky-500 to-sky-600 hover:bg-gradient-to-t hover:from-sky-400 hover:to-sky-600"
+              )}
+              disabled={mobileVisibleWindow == "Tasks"}
+              onClick={() => handleVisibleWindowClick("Tasks")}
+            >
+              Tasks
+            </Button>
+          </div>
+          <Expand className="flex w-full flex-grow overflow-hidden">
+            <ChatWindow
+              messages={messages}
+              title={<ChatWindowTitle model={settings.customModelName} />}
+              onSave={
+                shouldShowSave
+                  ? (format) => {
+                      setHasSaved(true);
+                      agentUtils.saveAgent({
+                        goal: goalInput.trim(),
+                        name: nameInput.trim(),
+                        tasks: messages,
+                      });
+                    }
+                  : undefined
+              }
+              scrollToBottom
+              setAgentRun={setAgentRun}
+              visibleOnMobile={mobileVisibleWindow === "Chat"}
+            />
+            <TaskWindow visibleOnMobile={mobileVisibleWindow === "Tasks"} />
+          </Expand>
 
-            <Expand className="flex w-full flex-row">
-              <ChatWindow
-                className="sm:mt-4"
-                messages={messages}
-                title={session?.user.subscriptionId ? proTitle : "AgentGPT"}
-                showDonation={false}
-                onSave={
-                  shouldShowSave
-                    ? (format) => {
-                        setHasSaved(true);
-                        agentUtils.saveAgent({
-                          goal: goalInput.trim(),
-                          name: name.trim(),
-                          tasks: messages,
-                        });
+          <FadeIn
+            delay={0}
+            initialY={30}
+            duration={1}
+            className="flex w-full flex-col items-center gap-2"
+          >
+            <AnimatePresence>
+              {!fullscreen && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "fit-content" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5, type: "easeInOut" }}
+                  className="flex w-full flex-col gap-2"
+                >
+                  <div className="flex w-full flex-row items-end gap-2 md:items-center">
+                    <Input
+                      inputRef={nameInputRef}
+                      left={
+                        <>
+                          <FaRobot />
+                          <span className="ml-2">{`${i18n?.t("AGENT_NAME", {
+                            ns: "indexPage",
+                          })}`}</span>
+                        </>
                       }
-                    : undefined
-                }
-                scrollToBottom
-              />
-              {tasks.length > 0 && <TaskWindow/>}
-            </Expand>
+                      value={nameInput}
+                      disabled={agent != null}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyPress(e)}
+                      placeholder="AgentGPT"
+                      type="text"
+                    />
+                    <Button
+                      ping
+                      onClick={() => setShowToolsDialog(true)}
+                      className="border-white/20 bg-gradient-to-t from-sky-500 to-sky-600 transition-all hover:bg-gradient-to-t hover:from-sky-400 hover:to-sky-600"
+                    >
+                      <p className="mr-3">Tools</p>
+                      <FaCog />
+                    </Button>
+                  </div>
+                  <Input
+                    left={
+                      <>
+                        <FaStar />
+                        <span className="ml-2">{`${i18n?.t("LABEL_AGENT_GOAL", {
+                          ns: "indexPage",
+                        })}`}</span>
+                      </>
+                    }
+                    disabled={agent != null}
+                    value={goalInput}
+                    onChange={(e) => setGoalInput(e.target.value)}
+                    onKeyDown={(e) => handleKeyPress(e)}
+                    placeholder={`${i18n?.t("PLACEHOLDER_AGENT_GOAL", {
+                      ns: "indexPage",
+                    })}`}
+                    type="textarea"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <div className="flex w-full flex-col gap-2 md:m-4">
-              <Expand delay={1.2}>
-                <Input
-                  inputRef={nameInputRef}
-                  left={
-                    <>
-                      <FaRobot />
-                      <span className="ml-2">{`${i18n?.t("AGENT_NAME", {
-                        ns: "indexPage",
-                      })}`}</span>
-                    </>
-                  }
-                  value={name}
-                  disabled={agent != null}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="AgentGPT"
-                  onKeyDown={handleKeyPress}
-                  type="text"
-                />
-              </Expand>
-              <Expand delay={1.3}>
-                <Input
-                  left={
-                    <>
-                      <FaStar />
-                      <span className="ml-2">{`${i18n?.t("LABEL_AGENT_GOAL", {
-                        ns: "indexPage",
-                      })}`}</span>
-                    </>
-                  }
-                  disabled={agent != null}
-                  value={goalInput}
-                  onChange={(e) => setGoalInput(e.target.value)}
-                  placeholder={`${i18n?.t("PLACEHOLDER_AGENT_GOAL", {
-                    ns: "indexPage",
-                  })}`}
-                  onKeyDown={handleKeyPress}
-                  type="textarea"
-                />
-              </Expand>
-            </div>
-
-            <Expand delay={1.4} className="flex gap-2">
+            <div className="flex gap-2">
               {firstButton}
               <Button
                 disabled={agent === null}
@@ -336,11 +341,11 @@ const Home: NextPage = () => {
                   })}`
                 )}
               </Button>
-            </Expand>
-          </div>
+            </div>
+          </FadeIn>
         </div>
-      </main>
-    </DefaultLayout>
+      </div>
+    </SidebarLayout>
   );
 };
 export default Home;
