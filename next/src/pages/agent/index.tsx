@@ -18,6 +18,7 @@ import {
 } from "../../components";
 import type { Message } from "../../components";
 import { env } from "../../env/client.mjs";
+import { SidebarLayout } from "../../layout";
 
 const AgentPage: NextPage = () => {
   const [ t ] = useTranslation();
@@ -43,46 +44,49 @@ const AgentPage: NextPage = () => {
   };
 
   return (
-    <DefaultLayout
-      className="flex w-full flex-col items-center justify-center gap-4 p-2 sm:p-4"
-      centered
-    >
-      <ChatWindow
-        messages={messages.filter((m) => m.type !== "thinking")}
-        title={getAgent?.data?.name}
-        visibleOnMobile
-      />
-      <div className="flex flex-row gap-2">
-        <Button
-          icon={<FaShare />}
-          onClick={() => {
-            void window.navigator.clipboard
-              .writeText(shareLink())
-              .then(() => setShowCopied(true));
-          }}
-          enabledClassName={"bg-green-600 hover:bg-green-400"}
-        >
-          Share
-        </Button>
-        <Button
-          icon={<FaTrash />}
-          onClick={() => {
-            deleteAgent.mutate(agentId);
-          }}
-          enabledClassName={"bg-red-600 hover:bg-red-400"}
-        >
-          Delete
-        </Button>
-        <Button icon={<FaBackspace />} onClick={() => void router.push("/")}>
-          Back
-        </Button>
+    <SidebarLayout>
+      <div
+        id="content"
+        className="flex h-screen w-full flex-col items-center justify-center gap-3 px-3 pt-7 md:px-10"
+      >
+        <ChatWindow
+          messages={messages.filter((m) => m.type !== "thinking")}
+          title={getAgent?.data?.name}
+          visibleOnMobile
+        />
+        <div className="flex flex-row gap-2">
+          <Button icon={<FaBackspace />} onClick={() => void router.push("/")}>
+            Back
+          </Button>
+          <Button
+            icon={<FaTrash />}
+            onClick={() => {
+              deleteAgent.mutate(agentId);
+            }}
+            enabledClassName={"bg-red-600 hover:bg-red-400"}
+          >
+            Delete
+          </Button>
+
+          <Button
+            icon={<FaShare />}
+            onClick={() => {
+              void window.navigator.clipboard
+                .writeText(shareLink())
+                .then(() => setShowCopied(true));
+            }}
+            enabledClassName={"bg-green-600 hover:bg-green-400"}
+          >
+            Share
+          </Button>
+        </div>
+        <Toast
+          model={[showCopied, setShowCopied]}
+          title={`${t("COPIED_TO_CLIPBOARD", { ns: "common" })}`}
+          className="bg-gray-950 text-sm"
+        />
       </div>
-      <Toast
-        model={[showCopied, setShowCopied]}
-        title={`${t("COPIED_TO_CLIPBOARD", { ns: "common" })}`}
-        className="bg-gray-950 text-sm"
-      />
-    </DefaultLayout>
+    </SidebarLayout>
   );
 };
 
