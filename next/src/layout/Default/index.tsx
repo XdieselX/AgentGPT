@@ -1,18 +1,13 @@
-import { type ReactNode } from "react";
 import Head from "next/head";
-import { DottedGridBackground } from "../components";
+import {
+  DottedGridBackground
+} from "../../components";
 import clsx from "clsx";
-import { useTranslation } from 'react-i18next';
+import { LayoutProps } from "./index.props";
 
-interface LayoutProps {
-  children: ReactNode;
-  className?: string;
-  centered?: boolean;
-}
+export const DefaultLayout = (props: LayoutProps) => {
+  const description = "Assemble, configure, and deploy autonomous AI Agents in your browser.";
 
-const DefaultLayout = (props: LayoutProps) => {
-  const [t] = useTranslation();
-  const description = t("HEADING_DESCRIPTION", { ns: "indexPage" });
   return (
     <div
       className={clsx(
@@ -25,24 +20,15 @@ const DefaultLayout = (props: LayoutProps) => {
         <meta name="description" content={description} />
         <meta name="twitter:site" content="@AgentGPT" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AgentGPT 🤖" />
+        <meta name="twitter:title" content="GPTSmart 🤖" />
         <meta name="twitter:description" content={description} />
-        <meta
-          name="twitter:image"
-          content="https://agentgpt.reworkd.ai/banner.png"
-        />
+        <meta name="twitter:image" content="https://agentgpt.reworkd.ai/banner.png" />
         <meta name="twitter:image:width" content="1280" />
         <meta name="twitter:image:height" content="640" />
-        <meta
-          property="og:title"
-          content="AgentGPT: Autonomous AI in your browser 🤖"
-        />
+        <meta property="og:title" content="AgentGPT: Autonomous AI in your browser 🤖" />
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://agentgpt.reworkd.ai/" />
-        <meta
-          property="og:image"
-          content="https://agentgpt.reworkd.ai/banner.png"
-        />
+        <meta property="og:image" content="https://agentgpt.reworkd.ai/banner.png" />
         <meta property="og:image:width" content="1280" />
         <meta property="og:image:height" content="640" />
         <meta property="og:type" content="website" />
@@ -52,13 +38,10 @@ const DefaultLayout = (props: LayoutProps) => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <DottedGridBackground
-        className={clsx("min-w-screen min-h-screen", props.className)}
-      >
+      <DottedGridBackground className={clsx("min-w-screen min-h-screen", props.className)}>
         {props.children}
       </DottedGridBackground>
     </div>
   );
 };
-
 export default DefaultLayout;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const [
+  MESSAGE_TYPE_ERROR,
   MESSAGE_TYPE_GOAL,
   MESSAGE_TYPE_THINKING,
   MESSAGE_TYPE_TASK,
@@ -8,6 +9,7 @@ export const [
   MESSAGE_TYPE_APPROVAL,
   MESSAGE_TYPE_SYSTEM,
 ] = [
+  "error" as const,
   "goal" as const,
   "thinking" as const,
   "task" as const,
@@ -54,6 +56,7 @@ export const taskSchema = z
 export const nonTaskScehma = z
   .object({
     type: z.union([
+      z.literal(MESSAGE_TYPE_ERROR),
       z.literal(MESSAGE_TYPE_GOAL),
       z.literal(MESSAGE_TYPE_THINKING),
       z.literal(MESSAGE_TYPE_ACTION),

@@ -1,18 +1,22 @@
 import React, { useState } from "react";
 import type { FC } from "react";
-import type { Session } from "next-auth";
 import { useTranslation } from "next-i18next";
-import clsx from "clsx";
-import { get_avatar } from "../../utils/user";
 import { FaSignInAlt } from "react-icons/fa";
-import Dialog from "../../ui/dialog";
+import clsx from "clsx";
 
-export const AuthItem: FC<{
-  session: Session | null;
-  classname?: string;
-  signIn: () => Promise<void>;
-  signOut: () => Promise<void>;
-}> = ({ session, classname, signOut, signIn }) => {
+import {
+  DialogUI
+} from "../..";
+import { getAvatar } from "../../../utils";
+import { AuthItemProps } from "./index.props";
+
+export const AuthItem: FC<AuthItemProps> = (props) => {
+  const {
+    session,
+    classname,
+    signIn,
+    signOut,
+  } = props;
   const [t] = useTranslation("drawer");
   const [showDialog, setShowDialog] = useState(false);
   const user = session?.user;
@@ -29,7 +33,7 @@ export const AuthItem: FC<{
       }}
     >
       {user && (
-        <img className="h-8 w-8 rounded-full bg-neutral-800" src={get_avatar(user)} alt="" />
+        <img className="h-8 w-8 rounded-full bg-neutral-800" src={getAvatar(user)} alt="" />
       )}
       {!user && (
         <h1 className="ml-2 flex flex-grow items-center gap-2 text-center">
@@ -40,12 +44,12 @@ export const AuthItem: FC<{
 
       <span className="sr-only">Your profile</span>
       <span aria-hidden="true">{user?.name}</span>
-      <Dialog
+      <DialogUI
         inline
         open={showDialog}
         setOpen={setShowDialog}
         title="My Account"
-        icon={<img className="rounded-full bg-neutral-800" src={get_avatar(user)} alt="" />}
+        icon={<img className="rounded-full bg-neutral-800" src={getAvatar(user)} alt="" />}
         actions={
           <>
             <button
@@ -72,7 +76,7 @@ export const AuthItem: FC<{
       >
         <p className="text-sm text-gray-500">Name: {user?.name}</p>
         <p className="text-sm text-gray-500">Email: {user?.email}</p>
-      </Dialog>
+      </DialogUI>
     </div>
   );
 };

@@ -84,23 +84,3 @@ export const realTasksFilter = (input: string): boolean => {
     !doNothingRegex.test(input)
   );
 };
-
-
-export const getMessageContainerStyle = (message: Message) => {
-  if (!isTask(message)) {
-    return "border-white/10 hover:border-white/40";
-  }
-
-  switch (message.status) {
-    case TASK_STATUS_STARTED:
-      return "border-white/20 hover:border-white/40";
-    case TASK_STATUS_EXECUTING:
-      return "border-white/20 hover:border-white/40";
-    case TASK_STATUS_COMPLETED:
-      return "border-green-500 hover:border-green-400";
-    case TASK_STATUS_FINAL:
-      return "border-green-500 hover:border-green-400";
-    default:
-      return "";
-  }
-};
