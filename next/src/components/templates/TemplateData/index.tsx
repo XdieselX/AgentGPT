@@ -205,4 +205,3 @@ export const TEMPLATE_DATA: TemplateModel[] = [
     placeholder: "Starry Night",
   },
 ];
-

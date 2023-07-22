@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useRouter } from "next/router";
-import { useAgentStore } from "../..";
 import { TemplateCardProps } from "./index.props";
+import { useAgentInputStore } from "../../../stores";
 
 export const TemplateCard = (props: TemplateCardProps) => {
   const {
@@ -9,25 +9,19 @@ export const TemplateCard = (props: TemplateCardProps) => {
   } = props;
 
   const router = useRouter()
-  const nameInput = useAgentStore.use.nameInput();
-  const setNameInput = useAgentStore.use.setNameInput();
-  const goalInput = useAgentStore.use.goalInput();
-  const setGoalInput = useAgentStore.use.setGoalInput();
+  const setNameInput = useAgentInputStore.use.setNameInput();
+  const setGoalInput = useAgentInputStore.use.setGoalInput();
 
   const handleClick = () => {
-      router.push("/")
-      setNameInput (
-          model.name
-      )
-      setGoalInput (
-          model.promptTemplate
-      )
+    setNameInput(model.name);
+    setGoalInput(model.promptTemplate);
+    router.push("/").catch(console.log);
   }
   return (
     <div
       onClick={handleClick}
       className={clsx(
-        "h-34 w-full space-y-2 whitespace-normal rounded-2xl border max-w-lg cursor-pointer border-white/20 p-4 text-left transition-all duration-100",
+        "h-34 w-full max-w-lg cursor-pointer space-y-2 whitespace-normal rounded-2xl border border-white/20 p-4 text-left transition-all duration-100",
         "bg-zinc-900 transition-colors hover:bg-zinc-800"
       )}
     >

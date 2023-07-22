@@ -1,6 +1,6 @@
 import Head from "next/head";
 
-export const AppHead = () => {
+export const AppHead = ({title, ogTitle}) => {
   // Do not translate. Head attributes won't have access to i18n.
   const description = "Assemble, configure, and deploy autonomous AI Agents in your browser.";
 

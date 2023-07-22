@@ -20,7 +20,7 @@ export const DefaultLayout = (props: LayoutProps) => {
         <meta name="description" content={description} />
         <meta name="twitter:site" content="@AgentGPT" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="GPTSmart 🤖" />
+        <meta name="twitter:title" content="AgentGPT 🤖" />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content="https://agentgpt.reworkd.ai/banner.png" />
         <meta name="twitter:image:width" content="1280" />
@@ -44,4 +44,5 @@ export const DefaultLayout = (props: LayoutProps) => {
     </div>
   );
 };
+
 export default DefaultLayout;

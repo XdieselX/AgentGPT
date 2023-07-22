@@ -6,7 +6,6 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-
 /**
  * 1. CONTEXT
  *
@@ -16,16 +15,24 @@
  * processing a request
  *
  */
+import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
+import superjson from "superjson";
 
 import { getServerAuthSession } from "../auth";
 import { prisma } from "../db";
 
+/**
+ * 2. INITIALIZATION
+ *
+ * This is where the trpc api is initialized, connecting the context and
+ * transformer
+ */
+
 type CreateContextOptions = {
   session: Session | null;
 };
-
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use
  * it, you can export it from here
@@ -41,7 +48,6 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
     prisma,
   };
 };
-
 /**
  * This is the actual context you'll use in your router. It will be used to
  * process every request that goes through your tRPC endpoint
@@ -49,23 +55,12 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   const { req, res } = opts;
-
   // Get the session from the server using the unstable_getServerSession wrapper function
   const session = await getServerAuthSession({ req, res });
-
   return createInnerTRPCContext({
     session,
   });
 };
-
-/**
- * 2. INITIALIZATION
- *
- * This is where the trpc api is initialized, connecting the context and
- * transformer
- */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -73,20 +68,17 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     return shape;
   },
 });
-
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
  *
  * These are the pieces you use to build your tRPC API. You should import these
  * a lot in the /src/server/api/routers folder
  */
-
 /**
  * This is how you create new routers and subrouters in your tRPC API
  * @see https://trpc.io/docs/router
  */
 export const createTRPCRouter = t.router;
-
 /**
  * Public (unauthed) procedure
  *
@@ -95,7 +87,6 @@ export const createTRPCRouter = t.router;
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure;
-
 /**
  * Reusable middleware that enforces users are logged in before running the
  * procedure
@@ -111,7 +102,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
     },
   });
 });
-
 /**
  * Protected (authed) procedure
  *

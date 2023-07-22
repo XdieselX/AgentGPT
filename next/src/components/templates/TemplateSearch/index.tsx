@@ -2,7 +2,8 @@ import type { ChangeEvent, FC } from "react";
 import React from "react";
 import { SearchBarProps } from "./index.props";
 
-export const SearchBar: FC<SearchBarProps> = ({ setSearchQuery, setCategory }) => {
+export const SearchBar: FC<SearchBarProps> = (props) => {
+  const { setSearchQuery, setCategory } = props;
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -35,9 +36,6 @@ export const SearchBar: FC<SearchBarProps> = ({ setSearchQuery, setCategory }) =
           <option>Health and Fitness</option>
           <option>Creative and social</option>
           <option>Academics and Professional</option>
-          {/*
-          //TODO: Add more categories
-          */}
           <option>Other</option>
         </select>
       </div>

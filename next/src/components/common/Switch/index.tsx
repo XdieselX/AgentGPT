@@ -1,12 +1,7 @@
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { clsx } from "clsx";
 import React, { useEffect, useState } from "react";
-
-interface SwitchProps {
-  value: boolean;
-  disabled?: boolean;
-  onChange: (checked: boolean) => void;
-}
+import { SwitchProps } from "./index.props";
 
 const Switch = (props: SwitchProps) => {
   const {
@@ -34,6 +29,7 @@ const Switch = (props: SwitchProps) => {
         "focus:outline-none focus-visible:ring focus-visible:ring-sky-500 focus-visible:ring-opacity-75",
         disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer "
       )}
+      disabled={disabled}
       onCheckedChange={handleChange}
       checked={checked}
     >

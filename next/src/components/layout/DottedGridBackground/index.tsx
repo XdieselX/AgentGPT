@@ -4,7 +4,7 @@ import { DottedGridBackgroundProps } from "./index.props";
 
 const DottedGridBackground = (props: DottedGridBackgroundProps) => {
   const { children, className } = props;
-  return <div className={clsx(className, "background")}>{children}</div>;
+  return <div className={clsx(className, "dark:background-dark background")}>{children}</div>;
 };
 
 export {

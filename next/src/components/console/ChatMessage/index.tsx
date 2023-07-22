@@ -1,26 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import clsx from "clsx";
 import type { Message } from "../..";
+import { FaCheck } from "react-icons/fa";
+import { FiClipboard } from "react-icons/fi";
+
 import {
+  Button,
   getTaskStatus,
   isAction,
   MarkdownRenderer,
-
   MESSAGE_TYPE_GOAL,
   MESSAGE_TYPE_SYSTEM,
   MESSAGE_TYPE_THINKING,
   TASK_STATUS_COMPLETED,
   TASK_STATUS_FINAL,
   TASK_STATUS_STARTED,
-} from "../..";
-import { useTranslation } from "next-i18next";
-import clsx from "clsx";
-import {
   getMessageContainerStyle,
   getTaskStatusIcon
-} from "../../../utils";
+} from "../..";
+import { useTranslation } from "next-i18next";
+import { ChatMessageProps } from "./index.props";
 
-const ChatMessage = ({ message }: { message: Message }) => {
+
+
+const ChatMessage = (props: ChatMessageProps) => {
+  const { message } = props;
   const [t] = useTranslation();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    try {
+      const textToCopy = isAction(message) ? message.info || "" : message.value;
+      void navigator.clipboard.writeText(textToCopy);
+      setIsCopied(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div
@@ -30,58 +46,43 @@ const ChatMessage = ({ message }: { message: Message }) => {
         "sm:my-1.5 sm:text-sm"
       )}
     >
-      {message.type != MESSAGE_TYPE_SYSTEM && (
-        // Avoid for system messages as they do not have an icon and will cause a weird space
+      {message.type !== MESSAGE_TYPE_SYSTEM && !isAction(message) && (
         <>
           <div className="mr-2 inline-block h-[0.9em]">{getTaskStatusIcon(message, {})}</div>
-          <span className="mr-2 font-bold">{t(getMessagePrefix(message), { ns: "chat" })}</span>
+          <span className="mr-2 font-bold">{getMessagePrefix(message)}</span>
         </>
-      )}
-
-      {message.type == MESSAGE_TYPE_THINKING && (
-        <span className="italic text-zinc-400">
-          {`${t("RESTART_IF_IT_TAKES_X_SEC", {
-            ns: "chat",
-          })}`}
-        </span>
       )}
 
       {isAction(message) ? (
         <>
+          <div className="flex flex-row">
+            <div className="mr-2 inline-block h-[0.9em]">{getTaskStatusIcon(message, {})}</div>
+            <span className="mr-2 flex-1 font-bold">{getMessagePrefix(message)}</span>
+            <Button
+              className="justify-end text-zinc-400 hover:text-white"
+              onClick={handleCopy}
+              aria-label="Copy"
+            >
+              <div className="w-full">{isCopied ? <FaCheck /> : <FiClipboard size={15} />}</div>
+            </Button>
+          </div>
           <hr className="my-2 border border-white/20" />
-          <div className="prose">
+          <div>
             <MarkdownRenderer>{message.info || ""}</MarkdownRenderer>
           </div>
         </>
       ) : (
         <>
-          <span>{t(message.value, { ns: "chat" })}</span>
-          {
-            // Link to the FAQ if it is a shutdown message
-            message.type == MESSAGE_TYPE_SYSTEM &&
-              (message.value.toLowerCase().includes("shut") ||
-                message.value.toLowerCase().includes("error")) && <FAQ />
-          }
+          <span>{message.value}</span>
+          {message.type === MESSAGE_TYPE_SYSTEM &&
+            (message.value.toLowerCase().includes("shut") ||
+              message.value.toLowerCase().includes("error")) && <FAQ />}
         </>
       )}
     </div>
   );
 };
-// Returns the translation key of the prefix
-const getMessagePrefix = (message: Message) => {
-  if (message.type === MESSAGE_TYPE_GOAL) {
-    return "EMBARKING_ON_NEW_GOAL";
-  } else if (message.type === MESSAGE_TYPE_THINKING) {
-    return "THINKING";
-  } else if (getTaskStatus(message) === TASK_STATUS_STARTED) {
-    return "TASK_ADDED";
-  } else if (getTaskStatus(message) === TASK_STATUS_COMPLETED) {
-    return `Completing: ${message.value}`;
-  } else if (getTaskStatus(message) === TASK_STATUS_FINAL) {
-    return "NO_MORE_TASKS";
-  }
-  return "";
-};
+
 const FAQ = () => {
   return (
     <p>
@@ -92,5 +93,19 @@ const FAQ = () => {
       </a>
     </p>
   );
+};
+
+// Returns the translation key of the prefix
+const getMessagePrefix = (message: Message) => {
+  if (message.type === MESSAGE_TYPE_GOAL) {
+    return "Embarking on a new goal";
+  } else if (getTaskStatus(message) === TASK_STATUS_STARTED) {
+    return "Task Added:";
+  } else if (getTaskStatus(message) === TASK_STATUS_COMPLETED) {
+    return `Executing: ${message.value}`;
+  } else if (getTaskStatus(message) === TASK_STATUS_FINAL) {
+    return `Finished:`;
+  }
+  return "";
 };
 export { ChatMessage };

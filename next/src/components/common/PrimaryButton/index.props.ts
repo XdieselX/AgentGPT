@@ -1,4 +1,8 @@
+import { ReactNode } from "react";
+
 export interface PrimaryButtonProps{
-  children: string;
-  onClick: () => void;
+  className?: string;
+  children: ReactNode | string;
+  icon?: React.ReactNode;
+  onClick?: () => void | Promise<void>;
 };

@@ -1,4 +1,4 @@
-import { isEmptyOrBlank } from "../src/utils";
+import { isEmptyOrBlank } from "../src/utils/whitespace";
 
 describe("WhiteSpace and empty string should return true", () => {
   test("Empty string should return true", () => {

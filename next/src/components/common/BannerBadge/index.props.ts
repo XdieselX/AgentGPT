@@ -1,4 +1,3 @@
-export interface BannerBadgeProps{
-  children: string;
-  onClick: () => void;
-};
+import { PropsWithChildren } from "react";
+
+export type BannerBadgeProps = PropsWithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement>>;

@@ -7,7 +7,7 @@ import { useTranslation } from "next-i18next";
 const Toast = (props: ToastProps) => {
   const [t] = useTranslation();
   const { className, model, title, description, onAction } = props;
-  const [open, setOpen] = props.model;
+  const [open, setOpen] = model;
 
   return (
     <ToastPrimitive.Provider swipeDirection={"right"}>
@@ -16,7 +16,6 @@ const Toast = (props: ToastProps) => {
         onOpenChange={setOpen}
         className={clsx(
           "fixed inset-x-4 bottom-4 z-50 w-auto rounded-2xl shadow-lg md:left-auto md:right-4 md:w-full md:max-w-sm",
-          "bg-slate-900",
           "radix-state-open:animate-toast-slide-in-bottom md:radix-state-open:animate-toast-slide-in-right",
           "radix-state-closed:animate-toast-hide",
           "radix-swipe-direction-right:radix-swipe-end:animate-toast-swipe-out-x",
@@ -36,9 +35,7 @@ const Toast = (props: ToastProps) => {
               </ToastPrimitive.Title>
               {description && (
                 <ToastPrimitive.Description className="dark:text-gray-10 text-md mt-1 rounded-md bg-slate-800/50 p-1 text-white">
-                  <pre className="overflow-hidden text-ellipsis">
-                    {description}
-                  </pre>
+                  <pre className="overflow-hidden text-ellipsis">{description}</pre>
                 </ToastPrimitive.Description>
               )}
             </div>
@@ -55,11 +52,11 @@ const Toast = (props: ToastProps) => {
                     setOpen(false);
                   }}
                 >
-                  {`${t("COPY", { ns: "common" })}`}
+                  {t("COPY", { ns: "common" })}
                 </ToastPrimitive.Action>
               )}
               <ToastPrimitive.Close className="text-md flex w-full items-center justify-center rounded-2xl border border-transparent px-3 py-2 font-medium text-white hover:bg-white/20 ">
-                {`${t("CLOSE", { ns: "common" })}`}
+                {t("CLOSE", { ns: "common" })}
               </ToastPrimitive.Close>
             </div>
           </div>

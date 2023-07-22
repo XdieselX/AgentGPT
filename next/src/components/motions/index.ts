@@ -1,4 +1,6 @@
+export * from './CycleIcons'
 export * from './Expand'
 export * from './FadeIn'
 export * from './FadeOut'
+export * from './HideShow'
 export * from './PopIn'

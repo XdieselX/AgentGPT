@@ -34,7 +34,7 @@ const IPDFButton = (props: PDFButtonProps) => {
           downloadPDF().catch(console.error);
         }}
         icon={<FaFilePdf size={12} />}
-        name={name}
+        text={name}
       />
     </>
   );

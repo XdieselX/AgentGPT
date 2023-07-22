@@ -1,15 +1,16 @@
-import React, { useState } from "react";
 import type { GetStaticProps } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import React, { useState } from "react";
+
 import nextI18NextConfig from "../../next-i18next.config.js";
-import { languages } from "../utils/languages";
 import {
-  TemplateCard,
   FadeIn,
+  TemplateCard,
+  TEMPLATE_DATA,
   SearchBar
 } from "../components";
-import { SidebarLayout } from "../layout";
-import { TEMPLATE_DATA } from "../components/templates/TemplateData";
+import {DashboardLayout} from "../layout/dashboard";
+import { languages } from "../utils/languages";
 
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,7 +24,7 @@ const Templates = () => {
   });
 
   return (
-    <SidebarLayout>
+    <DashboardLayout>
       <div className="flex h-full w-full flex-col p-10">
         <FadeIn initialX={-45} initialY={0} delay={0.1}>
           <div>
@@ -42,7 +43,7 @@ const Templates = () => {
           </div>
         </FadeIn>
       </div>
-    </SidebarLayout>
+    </DashboardLayout>
   );
 };
 

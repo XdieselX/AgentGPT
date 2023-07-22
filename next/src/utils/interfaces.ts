@@ -1,51 +1,38 @@
-import { OpenAIApi } from "openai";
-import { Config } from "../hooks/useConfig";
-import type { ModelSettings } from "../components";
-import type { Analysis } from "../services/agent-service";
+import type { Session } from "next-auth";
+
+import type { Analysis } from "../services/agent/analysis";
+import type { GPTModelNames, ModelSettings } from "../types";
+
+export interface ApiModelSettings {
+  language: string;
+  model: GPTModelNames;
+  temperature: number;
+  max_tokens: number;
+}
+
+export const toApiModelSettings = (modelSettings: ModelSettings, session?: Session) => {
+  const allowCustomization = session?.user;
+
+  return {
+    language: modelSettings.language.name,
+    model: allowCustomization ? modelSettings.customModelName : "gpt-3.5-turbo",
+    temperature: modelSettings.customTemperature,
+    max_tokens: allowCustomization ? modelSettings.maxTokens : 500,
+    custom_api_key: modelSettings.customApiKey,
+  };
+};
 
 export interface RequestBody {
-  modelSettings: ModelSettings;
+  run_id?: string;
+  model_settings: ApiModelSettings;
   goal: string;
-  language: string;
   task?: string;
   tasks?: string[];
-  lastTask?: string;
+  last_task?: string;
   result?: string;
-  completedTasks?: string[];
+  results?: string[];
+  completed_tasks?: string[];
   analysis?: Analysis;
-}
-
-/*export interface RequestBody {
-  modelSettings: ModelSettings;
-  goal: string;
-  task?: string;//Task
-  tasks?: string[];//Task[]
-  lastTask?: string;
-  result?: string;
-  completedTasks?: string[];
-}*/
-
-export interface Plugin {
-  ID(): string;
-  Name(): string;
-  Example(): string;
-  Prompt(): string;
-  Description(): string;
-  Execute(body: Record<string, any>): Promise<{ response: string; error: Error | null }>;
-}
-
-export interface Component {
-  Load(config: Config, client: OpenAIApi | null): Promise<Error | null>;
-  UpdateConfig(config: Config): void;
-  ID(): string;
-  Name(): string;
-  Prompt(): string;
-  Example(): string;
-  Description(): string;
-  Execute(args: string, body: string): Promise<{ response: string; error: Error | null }>;
-  Types(): {name: string; description: string;}[];
-}
-
-export interface IntervalPrompt {
-  IntervalPrompt(): string;
+  tool_names?: string[];
+  message?: string; // Used for the chat endpoint
 }
